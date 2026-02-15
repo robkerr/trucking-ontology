@@ -68,26 +68,28 @@ random.seed(None)  # Use current time for varied runs
 # ## Connect to Eventhouse (Kusto)
 
 # %%
-from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
-from azure.kusto.ingest import QueuedIngestClient, IngestionProperties, DataFormat
-from azure.identity import DefaultAzureCredential
+from azure.kusto.data import KustoClient, KustoConnectionStringBuilder, DataFormat
+from azure.kusto.ingest import QueuedIngestClient, IngestionProperties
 import io
 import pandas as pd
 
-# In Fabric notebooks, DefaultAzureCredential automatically uses
-# the notebook's identity (no secrets needed)
-credential = DefaultAzureCredential()
+# Fabric notebooks use mssparkutils for authentication (not DefaultAzureCredential)
+KUSTO_TOKEN_SCOPE = "https://kusto.kusto.windows.net"
 
-kcsb = KustoConnectionStringBuilder.with_azure_token_credential(
-    KUSTO_URI, credential
+def get_fabric_token():
+    """Get an access token using Fabric's built-in credential provider."""
+    return mssparkutils.credentials.getToken(KUSTO_TOKEN_SCOPE)
+
+# Query client — uses a token callback so tokens auto-refresh
+kcsb = KustoConnectionStringBuilder.with_token_provider(
+    KUSTO_URI, get_fabric_token
 )
-
 kusto_client = KustoClient(kcsb)
 
-# Ingest URI: replace the hostname prefix with "ingest-"
+# Ingest client — same approach with ingest- prefixed URI
 ingest_uri = KUSTO_URI.replace("https://", "https://ingest-")
-ingest_kcsb = KustoConnectionStringBuilder.with_azure_token_credential(
-    ingest_uri, credential
+ingest_kcsb = KustoConnectionStringBuilder.with_token_provider(
+    ingest_uri, get_fabric_token
 )
 ingest_client = QueuedIngestClient(ingest_kcsb)
 
