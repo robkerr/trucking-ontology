@@ -1,0 +1,128 @@
+// =============================================================================
+// Eventhouse (KQL Database) Table Setup — Long-Haul Trucking
+//
+// Run these commands in your Eventhouse KQL database BEFORE running the
+// 02_generate_events notebook. Execute each .create-merge-table block
+// separately in your KQL queryset.
+//
+// 5 tables — one per event type. The notebook ingests directly via the
+// Kusto Python SDK (no Eventstream needed).
+// =============================================================================
+
+// 1. TelemetryEvent — high-frequency GPS/vehicle data (every 30s per truck)
+.create-merge table TelemetryEvent (
+    event_id: guid,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    truck_id: guid,
+    trip_id: guid,
+    driver_id: guid,
+    latitude: real,
+    longitude: real,
+    speed_mph: real,
+    heading_degrees: int,
+    fuel_pct: real,
+    engine_temp_f: int,
+    oil_pressure_psi: int,
+    odometer_miles: long,
+    engine_rpm: int,
+    ambient_temp_f: int,
+    def_level_pct: real
+)
+
+.alter table TelemetryEvent policy retention
+```
+{ "SoftDeletePeriod": "365.00:00:00", "Recoverability": "Enabled" }
+```
+
+// 2. EngineFaultEvent — J1939 diagnostic trouble codes
+.create-merge table EngineFaultEvent (
+    event_id: guid,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    truck_id: guid,
+    trip_id: guid,
+    driver_id: guid,
+    spn: int,
+    fmi: int,
+    fault_description: string,
+    severity: string,
+    occurrence_count: int,
+    latitude: real,
+    longitude: real,
+    action: string
+)
+
+// 3. GeofenceEvent — terminal arrival/departure
+.create-merge table GeofenceEvent (
+    event_id: guid,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    truck_id: guid,
+    trip_id: guid,
+    driver_id: guid,
+    terminal_id: guid,
+    terminal_name: string,
+    geofence_event: string,
+    latitude: real,
+    longitude: real
+)
+
+// 4. HOSStatusChangeEvent — driver duty status transitions
+.create-merge table HOSStatusChangeEvent (
+    event_id: guid,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    driver_id: guid,
+    trip_id: guid,
+    truck_id: guid,
+    previous_status: string,
+    new_status: string,
+    driving_hours_used: real,
+    driving_hours_remaining: real,
+    duty_hours_used: real,
+    duty_hours_remaining: real,
+    cycle_hours_used: real,
+    cycle_hours_remaining: real,
+    break_time_remaining_minutes: int,
+    latitude: real,
+    longitude: real
+)
+
+// 5. LoadStatusEvent — load lifecycle status changes
+.create-merge table LoadStatusEvent (
+    event_id: guid,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    load_id: guid,
+    trip_id: guid,
+    customer_id: guid,
+    load_number: string,
+    previous_status: string,
+    new_status: string,
+    terminal_id: guid,
+    latitude: real,
+    longitude: real,
+    estimated_arrival: datetime,
+    notes: string
+)
+
+// ---------------------------------------------------------------------------
+// Verification queries — run after the notebook generates events
+// ---------------------------------------------------------------------------
+
+// TelemetryEvent | count
+// EngineFaultEvent | count
+// GeofenceEvent | count
+// HOSStatusChangeEvent | count
+// LoadStatusEvent | count
+
+// Sample: latest telemetry for each truck
+// TelemetryEvent
+// | summarize arg_max(timestamp, *) by truck_id
+// | project timestamp, truck_id, latitude, longitude, speed_mph, fuel_pct
