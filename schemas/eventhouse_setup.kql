@@ -11,13 +11,13 @@
 
 // 1. TelemetryEvent — high-frequency GPS/vehicle data (every 30s per truck)
 .create-merge table TelemetryEvent (
-    event_id: guid,
+    event_id: string,
     event_type: string,
     timestamp: datetime,
     source: string,
-    truck_id: guid,
-    trip_id: guid,
-    driver_id: guid,
+    truck_id: string,
+    trip_id: string,
+    driver_id: string,
     latitude: real,
     longitude: real,
     speed_mph: real,
@@ -38,13 +38,13 @@
 
 // 2. EngineFaultEvent — J1939 diagnostic trouble codes
 .create-merge table EngineFaultEvent (
-    event_id: guid,
+    event_id: string,
     event_type: string,
     timestamp: datetime,
     source: string,
-    truck_id: guid,
-    trip_id: guid,
-    driver_id: guid,
+    truck_id: string,
+    trip_id: string,
+    driver_id: string,
     spn: int,
     fmi: int,
     fault_description: string,
@@ -57,14 +57,14 @@
 
 // 3. GeofenceEvent — terminal arrival/departure
 .create-merge table GeofenceEvent (
-    event_id: guid,
+    event_id: string,
     event_type: string,
     timestamp: datetime,
     source: string,
-    truck_id: guid,
-    trip_id: guid,
-    driver_id: guid,
-    terminal_id: guid,
+    truck_id: string,
+    trip_id: string,
+    driver_id: string,
+    terminal_id: string,
     terminal_name: string,
     geofence_event: string,
     latitude: real,
@@ -73,13 +73,13 @@
 
 // 4. HOSStatusChangeEvent — driver duty status transitions
 .create-merge table HOSStatusChangeEvent (
-    event_id: guid,
+    event_id: string,
     event_type: string,
     timestamp: datetime,
     source: string,
-    driver_id: guid,
-    trip_id: guid,
-    truck_id: guid,
+    driver_id: string,
+    trip_id: string,
+    truck_id: string,
     previous_status: string,
     new_status: string,
     driving_hours_used: real,
@@ -95,17 +95,17 @@
 
 // 5. LoadStatusEvent — load lifecycle status changes
 .create-merge table LoadStatusEvent (
-    event_id: guid,
+    event_id: string,
     event_type: string,
     timestamp: datetime,
     source: string,
-    load_id: guid,
-    trip_id: guid,
-    customer_id: guid,
+    load_id: string,
+    trip_id: string,
+    customer_id: string,
     load_number: string,
     previous_status: string,
     new_status: string,
-    terminal_id: guid,
+    terminal_id: string,
     latitude: real,
     longitude: real,
     estimated_arrival: datetime,

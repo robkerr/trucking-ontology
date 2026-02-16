@@ -1,0 +1,8 @@
+MATCH (tr:Truck)-[:TruckMakesTrip]->(trip:Trip)
+RETURN
+tr.truck_number,
+tr.status,
+trip.trip_number,
+trip.scheduled_departure,
+trip.actual_departure
+
