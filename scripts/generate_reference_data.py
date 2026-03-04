@@ -16,7 +16,10 @@ from math import radians, sin, cos, sqrt, atan2
 
 random.seed(42)
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "reference_data")
+OUTPUT_DIR = os.environ.get(
+    "REFERENCE_OUTPUT_DIR",
+    os.path.join(os.path.dirname(__file__), "..", "reference_data"),
+)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # ---------------------------------------------------------------------------
@@ -31,6 +34,8 @@ def write_jsonl(filename, records):
     with open(path, "w", encoding="utf-8") as f:
         for rec in records:
             f.write(json.dumps(rec, default=str) + "\n")
+    # size_kb = os.path.getsize(path) / 1024
+    # print(f"  wrote {filename:<40} {len(records):>5} records  {size_kb:>7.1f} KB")
     print(f"  Wrote {len(records):>4} records → {filename}")
 
 def haversine_miles(lat1, lon1, lat2, lon2):
