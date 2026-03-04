@@ -1,0 +1,157 @@
+table loads
+	lineageTag: 8ed31833-cdf1-4b68-b516-7c64f30c077c
+	sourceLineageTag: [dbo].[loads]
+
+	column load_id
+		dataType: string
+		lineageTag: 751d5bf3-cedd-4366-b11e-d37e8ed94c09
+		sourceLineageTag: load_id
+		summarizeBy: none
+		sourceColumn: load_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_number
+		dataType: string
+		lineageTag: f673f8b2-aa21-4be8-9400-343c0a9a4885
+		sourceLineageTag: load_number
+		summarizeBy: none
+		sourceColumn: load_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_id
+		dataType: string
+		lineageTag: e2a94205-5e6c-418e-a810-7d1ad6e9cfb3
+		sourceLineageTag: customer_id
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_type
+		dataType: string
+		lineageTag: 89c1d837-ce9a-43f5-84d9-46718f61b865
+		sourceLineageTag: load_type
+		summarizeBy: none
+		sourceColumn: load_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column description
+		dataType: string
+		lineageTag: 720de059-eafe-4a96-ab84-5aeb5617a07e
+		sourceLineageTag: description
+		summarizeBy: none
+		sourceColumn: description
+
+		annotation SummarizationSetBy = Automatic
+
+	column weight_lbs
+		dataType: int64
+		formatString: 0
+		lineageTag: 58a5c2c4-d3fb-4e4c-9db4-7aac119e06c8
+		sourceLineageTag: weight_lbs
+		summarizeBy: sum
+		sourceColumn: weight_lbs
+
+		annotation SummarizationSetBy = Automatic
+
+	column required_trailer_type
+		dataType: string
+		lineageTag: a32eb246-e5ca-4aff-9b14-9766c7e6683f
+		sourceLineageTag: required_trailer_type
+		summarizeBy: none
+		sourceColumn: required_trailer_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column pickup_terminal_id
+		dataType: string
+		lineageTag: 2a6dfa35-bdc1-4010-8e3e-057b31a9bfe9
+		sourceLineageTag: pickup_terminal_id
+		summarizeBy: none
+		sourceColumn: pickup_terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivery_terminal_id
+		dataType: string
+		lineageTag: a6e8f68b-b09b-44ae-bea7-54e9e25c1ec9
+		sourceLineageTag: delivery_terminal_id
+		summarizeBy: none
+		sourceColumn: delivery_terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column pickup_window_start
+		dataType: string
+		lineageTag: 4dfa527c-e820-451d-be8a-8dede3fcd111
+		sourceLineageTag: pickup_window_start
+		summarizeBy: none
+		sourceColumn: pickup_window_start
+
+		annotation SummarizationSetBy = Automatic
+
+	column pickup_window_end
+		dataType: string
+		lineageTag: 0734714e-0101-4c8d-9a3a-276936f34afc
+		sourceLineageTag: pickup_window_end
+		summarizeBy: none
+		sourceColumn: pickup_window_end
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivery_window_start
+		dataType: string
+		lineageTag: 267ed13d-152b-4ad2-ad9c-7d9b7e9fa1cd
+		sourceLineageTag: delivery_window_start
+		summarizeBy: none
+		sourceColumn: delivery_window_start
+
+		annotation SummarizationSetBy = Automatic
+
+	column delivery_window_end
+		dataType: string
+		lineageTag: a0fd494d-cb25-4232-aebb-621353a308d9
+		sourceLineageTag: delivery_window_end
+		summarizeBy: none
+		sourceColumn: delivery_window_end
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: 057d9ae6-fb63-43bf-8104-f260135a5713
+		sourceLineageTag: status
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column priority
+		dataType: string
+		lineageTag: 5e3da7bd-2f45-4d2d-ac53-29a1c6c5c5af
+		sourceLineageTag: priority
+		summarizeBy: none
+		sourceColumn: priority
+
+		annotation SummarizationSetBy = Automatic
+
+	column value_usd
+		dataType: double
+		lineageTag: b1043491-155f-4fec-b95a-46591f39e1ed
+		sourceLineageTag: value_usd
+		summarizeBy: sum
+		sourceColumn: value_usd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition loads = entity
+		mode: directLake
+		source
+			entityName: loads
+			expressionSource: 'DirectLake - lh_trucking'
+

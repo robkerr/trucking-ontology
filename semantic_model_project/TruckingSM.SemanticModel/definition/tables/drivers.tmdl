@@ -1,0 +1,127 @@
+table drivers
+	lineageTag: a852bf0c-9590-493e-9494-1ff23681580b
+	sourceLineageTag: [dbo].[drivers]
+
+	column driver_id
+		dataType: string
+		lineageTag: 424f1e0d-0f0c-4184-971a-95281b87c2ef
+		sourceLineageTag: driver_id
+		summarizeBy: none
+		sourceColumn: driver_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column employee_id
+		dataType: string
+		lineageTag: b4669d99-79b0-42bd-ba8f-7b8f7f971e34
+		sourceLineageTag: employee_id
+		summarizeBy: none
+		sourceColumn: employee_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column first_name
+		dataType: string
+		lineageTag: ef15da60-e6f9-44e4-a8c5-49364f077341
+		sourceLineageTag: first_name
+		summarizeBy: none
+		sourceColumn: first_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_name
+		dataType: string
+		lineageTag: 6e29e2b0-5d2e-493d-98a4-b4a48f91f718
+		sourceLineageTag: last_name
+		summarizeBy: none
+		sourceColumn: last_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column cdl_number
+		dataType: string
+		lineageTag: 7fe2cde4-3a35-4dff-ae79-0813d2cee29d
+		sourceLineageTag: cdl_number
+		summarizeBy: none
+		sourceColumn: cdl_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column cdl_state
+		dataType: string
+		lineageTag: 2624db04-555e-4706-bd18-784bc6117006
+		sourceLineageTag: cdl_state
+		summarizeBy: none
+		sourceColumn: cdl_state
+
+		annotation SummarizationSetBy = Automatic
+
+	column cdl_expiration_date
+		dataType: string
+		lineageTag: 97920d4a-ffa3-42fb-8ad3-6a95f3aa4def
+		sourceLineageTag: cdl_expiration_date
+		summarizeBy: none
+		sourceColumn: cdl_expiration_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column hire_date
+		dataType: string
+		lineageTag: 27cf6a1b-6c1d-4a85-9018-985ca45a50ec
+		sourceLineageTag: hire_date
+		summarizeBy: none
+		sourceColumn: hire_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: db8e2ddf-4818-4d14-8cca-2689a43b1296
+		sourceLineageTag: status
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column home_terminal_id
+		dataType: string
+		lineageTag: 4df7473e-e940-4dd5-8f7e-73d9dff66454
+		sourceLineageTag: home_terminal_id
+		summarizeBy: none
+		sourceColumn: home_terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column phone
+		dataType: string
+		lineageTag: add690c6-bc7b-4b29-9b9b-15e4ebe45a04
+		sourceLineageTag: phone
+		summarizeBy: none
+		sourceColumn: phone
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: cce2f2ab-8b33-4956-8d20-728714e3b2a6
+		sourceLineageTag: email
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column supervisor_email
+		dataType: string
+		lineageTag: c3d8a166-ef90-4851-84aa-6781f52ef85d
+		sourceLineageTag: supervisor_email
+		summarizeBy: none
+		sourceColumn: supervisor_email
+
+		annotation SummarizationSetBy = Automatic
+
+	partition drivers = entity
+		mode: directLake
+		source
+			entityName: drivers
+			expressionSource: 'DirectLake - lh_trucking'
+

@@ -1,0 +1,139 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 53,
+            "y": 406
+          },
+          "nodeIndex": "customers",
+          "nodeLineageTag": "60397749-fa35-43e5-a3b9-1c56fabdc337",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 42.5,
+            "y": 2.75
+          },
+          "nodeIndex": "driver_hos_logs",
+          "nodeLineageTag": "040cf291-0d75-4057-a133-a05e754583d0",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 588.25,
+            "y": 0
+          },
+          "nodeIndex": "drivers",
+          "nodeLineageTag": "a852bf0c-9590-493e-9494-1ff23681580b",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 426.25,
+            "y": 632.5
+          },
+          "nodeIndex": "loads",
+          "nodeLineageTag": "8ed31833-cdf1-4b68-b516-7c64f30c077c",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 1680,
+            "y": 2.5
+          },
+          "nodeIndex": "routes",
+          "nodeLineageTag": "aea59e65-f0d6-470f-81d4-0c44f5e7c3c1",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 2102.75,
+            "y": 0
+          },
+          "nodeIndex": "terminals",
+          "nodeLineageTag": "4d52fe41-36f9-46e1-ab04-2d31af69c198",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 1408.75,
+            "y": 747.5
+          },
+          "nodeIndex": "trailers",
+          "nodeLineageTag": "f4105685-c88a-4ade-b474-2306cab45200",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 935,
+            "y": 501.25
+          },
+          "nodeIndex": "trips",
+          "nodeLineageTag": "fb901f3c-1fb5-4c78-b38b-c11131afe3ce",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 8
+        },
+        {
+          "location": {
+            "x": 1262.6999969482422,
+            "y": 28.5
+          },
+          "nodeIndex": "trucks",
+          "nodeLineageTag": "b569823e-f56d-4392-b862-e53245ca2251",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 9
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 80,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}
