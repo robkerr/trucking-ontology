@@ -1,0 +1,91 @@
+table customers
+	lineageTag: 60397749-fa35-43e5-a3b9-1c56fabdc337
+	sourceLineageTag: [dbo].[customers]
+
+	column customer_id
+		dataType: string
+		lineageTag: d837c212-dd84-4244-a934-1aae2a467e65
+		sourceLineageTag: customer_id
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column name
+		dataType: string
+		lineageTag: cccb1ede-dbc8-4015-9046-3ff39d9a8745
+		sourceLineageTag: name
+		summarizeBy: none
+		sourceColumn: name
+
+		annotation SummarizationSetBy = Automatic
+
+	column contact_name
+		dataType: string
+		lineageTag: 2ff823fb-2e2b-4b0c-b36a-f71fafed9ab0
+		sourceLineageTag: contact_name
+		summarizeBy: none
+		sourceColumn: contact_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column contact_email
+		dataType: string
+		lineageTag: 3bfa7bf7-1249-407f-9d5c-96bda62a9455
+		sourceLineageTag: contact_email
+		summarizeBy: none
+		sourceColumn: contact_email
+
+		annotation SummarizationSetBy = Automatic
+
+	column contact_phone
+		dataType: string
+		lineageTag: b7a82d40-61eb-4634-b718-7f5e08ceeb78
+		sourceLineageTag: contact_phone
+		summarizeBy: none
+		sourceColumn: contact_phone
+
+		annotation SummarizationSetBy = Automatic
+
+	column address
+		dataType: string
+		lineageTag: 0b141ff3-8bc9-462a-875c-91275adaccfc
+		sourceLineageTag: address
+		summarizeBy: none
+		sourceColumn: address
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 522d4b90-ca35-4f0c-82a6-93808c2a4495
+		sourceLineageTag: city
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state
+		dataType: string
+		lineageTag: 7fe77ded-e855-4bb3-a221-5b3b5ad0a6e7
+		sourceLineageTag: state
+		summarizeBy: none
+		sourceColumn: state
+
+		annotation SummarizationSetBy = Automatic
+
+	column industry
+		dataType: string
+		lineageTag: 90342da6-8ab8-4ccc-aa6d-566078392dff
+		sourceLineageTag: industry
+		summarizeBy: none
+		sourceColumn: industry
+
+		annotation SummarizationSetBy = Automatic
+
+	partition customers = entity
+		mode: directLake
+		source
+			entityName: customers
+			expressionSource: 'DirectLake - lh_trucking'
+

@@ -1,0 +1,94 @@
+table trailers
+	lineageTag: f4105685-c88a-4ade-b474-2306cab45200
+	sourceLineageTag: [dbo].[trailers]
+
+	column trailer_id
+		dataType: string
+		lineageTag: 2ad33818-e3ff-4f20-9fc9-4dbfab79025f
+		sourceLineageTag: trailer_id
+		summarizeBy: none
+		sourceColumn: trailer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column trailer_number
+		dataType: string
+		lineageTag: c0703f25-9c57-456e-8fae-9150ed3afc2f
+		sourceLineageTag: trailer_number
+		summarizeBy: none
+		sourceColumn: trailer_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column type
+		dataType: string
+		lineageTag: 75388b02-43fe-4635-aae7-0701f71b10a6
+		sourceLineageTag: type
+		summarizeBy: none
+		sourceColumn: type
+
+		annotation SummarizationSetBy = Automatic
+
+	column length_ft
+		dataType: int64
+		formatString: 0
+		lineageTag: f37517e9-17c0-4f6b-bbce-bd4a30d06f80
+		sourceLineageTag: length_ft
+		summarizeBy: none
+		sourceColumn: length_ft
+
+		annotation SummarizationSetBy = Automatic
+
+	column max_weight_lbs
+		dataType: int64
+		formatString: 0
+		lineageTag: c673c9fd-9d42-4732-8f2e-6d0eb9b1a31f
+		sourceLineageTag: max_weight_lbs
+		summarizeBy: none
+		sourceColumn: max_weight_lbs
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: 052a1c10-9ccd-4405-b3d1-1145d568ccb9
+		sourceLineageTag: status
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column home_terminal_id
+		dataType: string
+		lineageTag: bb509fb3-5692-48c2-bde5-944cf998fa56
+		sourceLineageTag: home_terminal_id
+		summarizeBy: none
+		sourceColumn: home_terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: b842faa6-4246-451e-8ca3-8af489423efe
+		sourceLineageTag: year
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_inspection_date
+		dataType: string
+		lineageTag: b60819f2-4123-4b88-a973-9509b0257d3c
+		sourceLineageTag: last_inspection_date
+		summarizeBy: none
+		sourceColumn: last_inspection_date
+
+		annotation SummarizationSetBy = Automatic
+
+	partition trailers = entity
+		mode: directLake
+		source
+			entityName: trailers
+			expressionSource: 'DirectLake - lh_trucking'
+
