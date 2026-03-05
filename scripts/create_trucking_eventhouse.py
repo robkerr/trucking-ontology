@@ -1,12 +1,12 @@
 """
-create_trucking_eventhouse.py — Create an Eventhouse and KQL Database in Fabric.
+create_trucking_eventhouse.py — Create an Eventhouse, KQL Database, and tables in Fabric.
 
 Creates `eh_trucking` (Eventhouse) and `trucking_db` (KQL Database) in the target
-workspace. Both operations are idempotent — existing resources are detected and
-skipped; only the IDs are returned.
+workspace, then executes the table DDLs from ``eventhouse_setup.kql``.
+All operations are idempotent — existing resources are detected and skipped.
 
 Usage:
-    python scripts/create_trucking_eventhouse.py \
+    python scripts/create_trucking_eventhouse.py \\
         --workspace-id <WORKSPACE_GUID>
 
     # or via environment variable:
@@ -14,11 +14,12 @@ Usage:
     python scripts/create_trucking_eventhouse.py
 
 Requirements:
-    pip install sempy-labs
+    pip install sempy-labs requests azure-identity
 """
 
 import argparse
 import os
+import pathlib
 import sys
 import time
 
@@ -28,6 +29,104 @@ import time
 
 EVENTHOUSE_NAME = "eh_trucking"
 KQL_DB_NAME     = "trucking_db"
+KUSTO_SCOPE     = "https://kusto.kusto.windows.net/.default"
+KQL_SETUP_FILE  = pathlib.Path(__file__).resolve().parent / "eventhouse_setup.kql"
+
+# ---------------------------------------------------------------------------
+# Embedded DDL statements (sourced from eventhouse_setup.kql)
+# ---------------------------------------------------------------------------
+
+_KQL_DDL_STATEMENTS = [
+    """.create-merge table TelemetryEvent (
+    event_id: string,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    truck_id: string,
+    trip_id: string,
+    driver_id: string,
+    latitude: real,
+    longitude: real,
+    speed_mph: real,
+    heading_degrees: int,
+    fuel_pct: real,
+    engine_temp_f: int,
+    oil_pressure_psi: int,
+    odometer_miles: long,
+    engine_rpm: int,
+    ambient_temp_f: int,
+    def_level_pct: real
+)""",
+    """.alter table TelemetryEvent policy retention ```{ "SoftDeletePeriod": "365.00:00:00", "Recoverability": "Enabled" }```""",
+    """.create-merge table EngineFaultEvent (
+    event_id: string,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    truck_id: string,
+    trip_id: string,
+    driver_id: string,
+    spn: int,
+    fmi: int,
+    fault_description: string,
+    severity: string,
+    occurrence_count: int,
+    latitude: real,
+    longitude: real,
+    action: string
+)""",
+    """.create-merge table GeofenceEvent (
+    event_id: string,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    truck_id: string,
+    trip_id: string,
+    driver_id: string,
+    terminal_id: string,
+    terminal_name: string,
+    geofence_event: string,
+    latitude: real,
+    longitude: real
+)""",
+    """.create-merge table HOSStatusChangeEvent (
+    event_id: string,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    driver_id: string,
+    trip_id: string,
+    truck_id: string,
+    previous_status: string,
+    new_status: string,
+    driving_hours_used: real,
+    driving_hours_remaining: real,
+    duty_hours_used: real,
+    duty_hours_remaining: real,
+    cycle_hours_used: real,
+    cycle_hours_remaining: real,
+    break_time_remaining_minutes: int,
+    latitude: real,
+    longitude: real
+)""",
+    """.create-merge table LoadStatusEvent (
+    event_id: string,
+    event_type: string,
+    timestamp: datetime,
+    source: string,
+    load_id: string,
+    trip_id: string,
+    customer_id: string,
+    load_number: string,
+    previous_status: string,
+    new_status: string,
+    terminal_id: string,
+    latitude: real,
+    longitude: real,
+    estimated_arrival: datetime,
+    notes: string
+)""",
+]
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -178,6 +277,148 @@ def ensure_kql_database(workspace_id: str, eventhouse_id: str, client=None) -> s
     print(f"  ✅ KQL Database created — KQL_DB_ID = {db_id}")
     return db_id
 
+
+def create_kql_tables(
+    workspace_id: str,
+    eventhouse_id: str,
+    kql_db_name: str,
+    client=None,
+) -> list:
+    """Create KQL tables in the target database via the Eventhouse management API.
+
+    Resolves the ``queryServiceUri`` from the Eventhouse item, then executes each
+    embedded DDL statement (.create-merge table and .alter table policy) against the
+    Kusto management endpoint.
+
+    Token acquisition order:
+      1. ``notebookutils.credentials.getToken`` — used inside a Fabric notebook.
+      2. ``azure.identity.DefaultAzureCredential`` — fallback for CLI / local runs.
+
+    Returns a list of table names that were successfully created or merged.
+    """
+    import requests as _requests
+
+    if client is None:
+        client = _get_client()
+
+    # 1. Resolve queryServiceUri from the Eventhouse item
+    resp = client.get(f"v1/workspaces/{workspace_id}/eventhouses/{eventhouse_id}")
+    resp.raise_for_status()
+    props = resp.json().get("properties", {})
+    query_uri = props.get("queryServiceUri") or props.get("queryUri")
+    if not query_uri:
+        raise RuntimeError(
+            f"queryServiceUri not found in Eventhouse properties. "
+            f"Available keys: {list(props.keys())}"
+        )
+
+    # 2. Acquire a Kusto bearer token
+    token = None
+    try:
+        import notebookutils  # available inside a Fabric notebook
+        token = notebookutils.credentials.getToken("https://kusto.kusto.windows.net")
+    except Exception:
+        from azure.identity import DefaultAzureCredential
+        token = DefaultAzureCredential().get_token(KUSTO_SCOPE).token
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    mgmt_url = f"{query_uri.rstrip('/')}/v1/rest/mgmt"
+
+    # 3. Execute each DDL statement
+    created_tables: list = []
+    total = len(_KQL_DDL_STATEMENTS)
+    for i, stmt in enumerate(_KQL_DDL_STATEMENTS, 1):
+        first_line = stmt.splitlines()[0][:80]
+        try:
+            r = _requests.post(
+                mgmt_url,
+                headers=headers,
+                json={"db": kql_db_name, "csl": stmt, "properties": {}},
+                timeout=60,
+            )
+            r.raise_for_status()
+            print(f"  ✅ [{i}/{total}] {first_line}")
+            # Collect table name from .create-merge table statements
+            tokens = stmt.split()
+            if len(tokens) >= 3 and tokens[0] == ".create-merge" and tokens[1] == "table":
+                table_name = tokens[2]
+                if table_name not in created_tables:
+                    created_tables.append(table_name)
+        except Exception as exc:
+            print(f"  ✗ [{i}/{total}] {first_line}")
+            print(f"       Error: {exc}")
+
+    return created_tables
+
+
+def _parse_kql_commands(kql_path):
+    """Parse a .kql file into individual executable management commands."""
+    text = pathlib.Path(kql_path).read_text(encoding="utf-8")
+    commands = []
+    current = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("//"):
+            continue
+        if stripped.startswith("."):
+            if current:
+                cmd = "\n".join(current).strip()
+                if cmd:
+                    commands.append(cmd)
+            current = [line]
+        elif current:
+            current.append(line)
+    if current:
+        cmd = "\n".join(current).strip()
+        if cmd:
+            commands.append(cmd)
+    return commands
+
+
+def run_kql_setup(workspace_id, kql_db_id, kql_path=KQL_SETUP_FILE, client=None):
+    """Execute KQL management commands from a .kql file against the database."""
+    import requests as _requests
+    from azure.identity import DefaultAzureCredential
+
+    if client is None:
+        client = _get_client()
+
+    # Resolve the Kusto query-service URI from database properties
+    resp = client.get(f"v1/workspaces/{workspace_id}/kqlDatabases/{kql_db_id}")
+    resp.raise_for_status()
+    props = resp.json().get("properties", {})
+    query_uri = props.get("queryServiceUri") or props.get("queryUri")
+    if not query_uri:
+        raise RuntimeError("queryServiceUri not found in KQL database properties.")
+
+    commands = _parse_kql_commands(kql_path)
+    if not commands:
+        print("  ⚠️  No KQL commands found in", kql_path)
+        return
+
+    token = DefaultAzureCredential().get_token(KUSTO_SCOPE).token
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+    mgmt_url = f"{query_uri.rstrip('/')}/v1/rest/mgmt"
+
+    for i, cmd in enumerate(commands, 1):
+        first_line = cmd.splitlines()[0][:70]
+        print(f"    [{i}/{len(commands)}] {first_line}")
+        r = _requests.post(
+            mgmt_url, headers=headers,
+            json={"db": KQL_DB_NAME, "csl": cmd},
+        )
+        r.raise_for_status()
+
+    print(f"  ✅ Executed {len(commands)} KQL command(s) from {pathlib.Path(kql_path).name}")
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -209,11 +450,18 @@ def main():
 
     client = _get_client()
 
-    print("\n[1/2] Eventhouse...")
+    print("\n[1/4] Eventhouse...")
     eventhouse_id = ensure_eventhouse(args.workspace_id, client)
 
-    print("\n[2/2] KQL Database...")
+    print("\n[2/4] KQL Database...")
     kql_db_id = ensure_kql_database(args.workspace_id, eventhouse_id, client)
+
+    print("\n[3/4] KQL Table DDLs (embedded)...")
+    created = create_kql_tables(args.workspace_id, eventhouse_id, KQL_DB_NAME, client)
+    print(f"  Tables ready: {', '.join(created) if created else '(none)'}")
+
+    print("\n[4/4] KQL Table DDLs (from file)...")
+    run_kql_setup(args.workspace_id, kql_db_id, client=client)
 
     print(f"\n✅ Eventhouse  : {EVENTHOUSE_NAME} ({eventhouse_id})")
     print(f"   KQL Database : {KQL_DB_NAME} ({kql_db_id})")
