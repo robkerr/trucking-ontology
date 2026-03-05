@@ -7,3 +7,4 @@ dist/
 build/
 .ipynb_checkpoints/
 content_out.json
+_cells_dump.txt
