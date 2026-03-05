@@ -1,0 +1,313 @@
+=== Cell 0 | type: markdown ===
+<h1 align="center">🚛 Trucking Ontology Workshop</h1>
+<h3 align="center">Notebook 00 — Environment Setup</h3>
+
+<div align="center">
+<table style="border:none;background:transparent;margin:auto"><tr style="border:none">
+<td style="border:none;padding:2px"><img src="https://img.shields.io/badge/python-3.9%2B-blue?logo=python&logoColor=white" /></td>
+<td style="border:none;padding:2px"><img src="https://img.shields.io/badge/jupyter-notebook-orange?logo=jupyter&logoColor=white" /></td>
+<td style="border:none;padding:2px"><img src="https://img.shields.io/badge/Microsoft%20Fabric-ready-0078D4?logo=microsoft&logoColor=white" /></td>
+</tr></table>
+</div>
+
+---
+
+> **Purpose:** Run each cell in order to provision all Fabric resources needed for the workshop.  
+> Each step is idempotent — safe to re-run if something fails partway through.
+
+=== Cell 1 | type: markdown ===
+## 📋 Prerequisites
+
+#### 🏗️ Workspace & Access
+
+<table style="text-align:left; width:100%">
+<thead><tr><th></th><th>Requirement</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>🏢</td><td><strong>Fabric-enabled workspace</strong></td><td>Use this workspace for all resources in the tutorial</td></tr>
+<tr><td>👤</td><td><strong>Workspace role: Contributor or higher</strong></td><td>The user running this notebook must have at least Contributor access; Admin role recommended</td></tr>
+<tr><td>⚡</td><td><strong>F16 capacity (minimum)</strong></td><td>Use at least F16 to avoid throttling and ensure optimal performance</td></tr>
+</tbody>
+</table>
+
+#### 🔧 Tenant Settings *(enabled by a Fabric Administrator)*
+
+<table style="text-align:left; width:100%">
+<thead><tr><th></th><th>Setting</th><th>Location</th></tr></thead>
+<tbody>
+<tr><td>1️⃣</td><td>Enable <strong>Ontology item</strong> <em>(preview)</em></td><td>Admin Portal → Tenant Settings</td></tr>
+<tr><td>2️⃣</td><td>User can create <strong>Graph</strong> <em>(preview)</em></td><td>Admin Portal → Tenant Settings</td></tr>
+<tr><td>3️⃣</td><td>Users can create and share <strong>Data agent</strong> item types <em>(preview)</em></td><td>Admin Portal → Tenant Settings</td></tr>
+<tr><td>4️⃣</td><td>Users can use <strong>Copilot</strong> and features powered by Azure OpenAI</td><td>Admin Portal → Tenant Settings</td></tr>
+<tr><td>5️⃣</td><td>Data sent to Azure OpenAI can be <strong>processed outside</strong> your capacity's region</td><td>Admin Portal → Tenant Settings</td></tr>
+<tr><td>6️⃣</td><td>Data sent to Azure OpenAI can be <strong>stored outside</strong> your capacity's region</td><td>Admin Portal → Tenant Settings</td></tr>
+</tbody>
+</table>
+
+> ⚠️ Settings 4–6 involve cross-region data processing by Azure OpenAI. Review your organization's data residency and compliance policies before enabling them.
+
+=== Cell 2 | type: markdown ===
+---
+## ⚙️ Setup — Configure & Download Assets
+
+Fill in your **Workspace ID** below, then run the two cells to:
+1. Set configuration variables used by every step below
+2. Download all workshop scripts and the `TruckingSM.SemanticModel` files from GitHub into `./builtin/`
+
+> These downloads only happen once — every subsequent step just uses local files.
+
+=== Cell 3 | type: code ===
+# ── Configuration ──────────────────────────────────────────────────────────
+WORKSPACE_ID   = "your-workspace-id"    # 👈 Replace with your Fabric workspace GUID
+LAKEHOUSE_NAME = "lh_trucking"          # Lakehouse to create (or reuse if it exists)
+# ────────────────────────────────────────────────────────────────────────────
+
+=== Cell 4 | type: code ===
+import urllib.request, json
+from pathlib import Path
+
+BRANCH  = "ag-automate-setup"
+REPO    = "robkerr/trucking-ontology"
+RAW     = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}"
+API     = f"https://api.github.com/repos/{REPO}/git/trees/{BRANCH}?recursive=1"
+
+# Folders to mirror into ./builtin/  →  (repo_prefix, local_subdir)
+FOLDERS = [
+    ("scripts",                                  ""),                          # flat into builtin/
+    ("semantic_model_project/TruckingSM.SemanticModel", "TruckingSM.SemanticModel"),
+]
+
+BUILTIN = Path("./builtin")
+BUILTIN.mkdir(exist_ok=True)
+
+def _download(url, dest):
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    req = urllib.request.Request(url, headers={"User-Agent": "FabricNotebook/1.0"})
+    with urllib.request.urlopen(req) as r:
+        dest.write_bytes(r.read())
+
+# Fetch full tree once
+print(f"Fetching file tree for branch '{BRANCH}'...")
+req = urllib.request.Request(API, headers={"User-Agent": "FabricNotebook/1.0"})
+with urllib.request.urlopen(req) as r:
+    tree = json.loads(r.read())["tree"]
+print(f"  {len(tree)} total entries in repo.\n")
+
+for repo_prefix, local_sub in FOLDERS:
+    blobs = [e for e in tree if e["type"] == "blob" and e["path"].startswith(repo_prefix + "/")]
+    label = local_sub or repo_prefix
+    print(f"📥 Downloading {len(blobs)} file(s) from '{repo_prefix}/'...")
+    dest_root = BUILTIN / local_sub if local_sub else BUILTIN
+    for entry in blobs:
+        rel      = entry["path"][len(repo_prefix) + 1:]   # strip the folder prefix
+        dest     = dest_root / rel
+        url      = f"{RAW}/{entry['path']}"
+        _download(url, dest)
+        print(f"   ✅ {rel}")
+    print()
+
+print(f"✅ All assets downloaded → {BUILTIN.resolve()}")
+
+
+=== Cell 5 | type: markdown ===
+---
+## 🏗️ Step 1 — Create Lakehouse
+
+Creates the `lh_trucking` Lakehouse in your workspace.
+If it already exists the cell is a no-op — safe to re-run.
+
+=== Cell 6 | type: code ===
+import sempy.fabric as fabric
+
+client = fabric.FabricRestClient()
+
+# List all lakehouses in the workspace and find ours by name
+resp = client.get(f"v1/workspaces/{WORKSPACE_ID}/lakehouses")
+resp.raise_for_status()
+lakehouses = resp.json().get("value", [])
+existing = next((lh for lh in lakehouses if lh["displayName"] == LAKEHOUSE_NAME), None)
+
+if existing:
+    LAKEHOUSE_ID = existing["id"]
+    print(f"ℹ️  Lakehouse '{LAKEHOUSE_NAME}' already exists — skipping creation.")
+    print(f"   LAKEHOUSE_ID = {LAKEHOUSE_ID}")
+else:
+    resp = client.post(
+        f"v1/workspaces/{WORKSPACE_ID}/lakehouses",
+        json={"displayName": LAKEHOUSE_NAME},
+    )
+    resp.raise_for_status()
+    LAKEHOUSE_ID = resp.json()["id"]
+    print(f"✅ Lakehouse created: {LAKEHOUSE_NAME}")
+    print(f"   LAKEHOUSE_ID = {LAKEHOUSE_ID}")
+
+
+=== Cell 7 | type: markdown ===
+---
+## 📄 Step 2 — Generate Reference Data
+
+Runs `generate_reference_data.py` (already in `./builtin/`) to produce 11 synthetic
+JSONL files, then uploads them directly to the Lakehouse via OneLake:
+`Files/reference_data/`
+
+Files are generated locally in `/tmp/` first, then uploaded using `mssparkutils.fs.put()`
+— no default lakehouse mount required.
+
+=== Cell 8 | type: code ===
+import os
+from pathlib import Path
+
+BUILTIN_SCRIPT = Path("./builtin/generate_reference_data.py")
+LOCAL_TMP      = Path("/tmp/reference_data")
+ONELAKE_DEST   = (
+    f"abfss://{WORKSPACE_ID}@onelake.dfs.fabric.microsoft.com"
+    f"/{LAKEHOUSE_ID}/Files/reference_data"
+)
+
+if not BUILTIN_SCRIPT.exists():
+    raise FileNotFoundError(
+        "generate_reference_data.py not found in built-in resources.\n"
+        "Re-run the download cell above first."
+    )
+
+LOCAL_TMP.mkdir(parents=True, exist_ok=True)
+os.environ["REFERENCE_OUTPUT_DIR"] = str(LOCAL_TMP)
+
+print("Generating reference data locally...\n")
+script_src = BUILTIN_SCRIPT.read_text(encoding="utf-8")
+exec(script_src, {"__file__": str(BUILTIN_SCRIPT), "__name__": "__main__"})
+
+jsonl_files = sorted(LOCAL_TMP.glob("*.jsonl"))
+if not jsonl_files:
+    raise RuntimeError("No JSONL files were written. Check the output above for errors.")
+
+print(f"\nUploading {len(jsonl_files)} files to Lakehouse...")
+for f in jsonl_files:
+    dest = f"{ONELAKE_DEST}/{f.name}"
+    mssparkutils.fs.put(dest, f.read_text(encoding="utf-8"), True)
+    print(f"   ✅ {f.name:<35} {f.stat().st_size / 1024:>7.1f} KB")
+
+print(f"\n🎉 {len(jsonl_files)} files written to the Lakehouse.")
+print(f"   Lakehouse : {LAKEHOUSE_NAME} ({LAKEHOUSE_ID})")
+print( "   Next      : Step 3 will create Delta tables from these files.")
+
+
+=== Cell 9 | type: markdown ===
+---
+## 📊 Step 3 — Create Delta Tables
+
+Runs `01_load_reference_data.ipynb` as a child notebook, passing the Lakehouse name and data path as parameters. That notebook reads each JSONL file and creates a corresponding Delta table in the Lakehouse.
+
+> This step may take 2–5 minutes to complete.
+
+=== Cell 10 | type: code ===
+notebookutils.notebook.run(
+    "01_load_reference_data",
+    timeout_seconds=600,
+    arguments={
+        "LAKEHOUSE_NAME":      LAKEHOUSE_NAME,
+        "REFERENCE_DATA_PATH": "Files/reference_data",
+    },
+)
+print("✅ Delta tables created successfully.")
+
+=== Cell 11 | type: markdown ===
+---
+## 🚀 Step 4 — Deploy Semantic Model
+
+Uses `create_trucking_sm.py` (already in `./builtin/`) and the pre-downloaded
+`TruckingSM.SemanticModel` files to:
+
+1. Install **fabric-cicd** (if needed)
+2. Patch `expressions.tmdl` with this workspace's OneLake URL
+3. Publish the model via `fabric-cicd`
+4. Trigger a full refresh and wait for completion
+
+> Run the single cell below.
+
+=== Cell 12 | type: code ===
+import importlib.util
+from pathlib import Path
+
+# Load create_trucking_sm.py as a module from builtin/
+spec = importlib.util.spec_from_file_location(
+    "create_trucking_sm", "./builtin/create_trucking_sm.py"
+)
+sm = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sm)
+
+sm.ensure_fabric_cicd()
+
+# Patch the pre-downloaded expressions.tmdl then publish
+sm_dir = Path("./builtin/TruckingSM.SemanticModel")
+sm.patch_expressions(sm_dir, WORKSPACE_ID, LAKEHOUSE_ID)
+sm.publish_model(WORKSPACE_ID, Path("./builtin"))
+
+sm.trigger_refresh(WORKSPACE_ID)
+
+=== Cell 13 | type: markdown ===
+---
+## 🏠 Step 5 — Create Eventhouse & KQL Database
+
+Uses `create_trucking_eventhouse.py` (already in `./builtin/`) to create:
+- **Eventhouse** `eh_trucking`
+- **KQL Database** `trucking_db` inside it
+
+Both resources are idempotent — existing ones are detected and skipped.
+
+> Provisioning is asynchronous; the cell polls until both are ready.
+
+=== Cell 14 | type: code ===
+import importlib.util
+
+# Load create_trucking_eventhouse.py as a module from builtin/
+spec = importlib.util.spec_from_file_location(
+    "create_trucking_eventhouse", "./builtin/create_trucking_eventhouse.py"
+)
+eh = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(eh)
+
+client = eh._get_client()
+
+print("[1/2] Eventhouse...")
+EVENTHOUSE_ID = eh.ensure_eventhouse(WORKSPACE_ID, client)
+
+print("\n[2/2] KQL Database...")
+KQL_DB_ID = eh.ensure_kql_database(WORKSPACE_ID, EVENTHOUSE_ID, client)
+
+print(f"\n✅ Eventhouse  : {eh.EVENTHOUSE_NAME} ({EVENTHOUSE_ID})")
+print(f"   KQL Database : {eh.KQL_DB_NAME} ({KQL_DB_ID})")
+
+=== Cell 15 | type: markdown ===
+---
+## ⚡ Step 6 — Generate Synthetic Events
+
+Runs `02_generate_events.ipynb` as a child notebook, passing the Eventhouse
+query URI and KQL Database name as parameters.
+
+The notebook generates realistic telemetry, load-status, engine-fault,
+and weather-alert event streams and ingests them directly into the
+`trucking_db` KQL tables via the Kusto Python SDK.
+
+=== Cell 16 | type: code ===
+# Resolve the Eventhouse query URI from the REST API
+resp = client.get(f"v1/workspaces/{WORKSPACE_ID}/eventhouses/{EVENTHOUSE_ID}")
+resp.raise_for_status()
+KUSTO_URI = resp.json()["properties"]["queryServiceUri"]
+KUSTO_DATABASE = eh.KQL_DB_NAME   # 'trucking_db'
+
+print(f"  Eventhouse URI : {KUSTO_URI}")
+print(f"  KQL Database   : {KUSTO_DATABASE}")
+
+notebookutils.notebook.run(
+    "02_generate_events",
+    timeout_seconds=900,
+    arguments={
+        "KUSTO_URI":      KUSTO_URI,
+        "KUSTO_DATABASE": KUSTO_DATABASE,
+        "LAKEHOUSE_ID": LAKEHOUSE_ID,
+        "WORKSPACE_ID": WORKSPACE_ID
+
+    },
+)
+print("\n✅ Event generation complete.")
+
