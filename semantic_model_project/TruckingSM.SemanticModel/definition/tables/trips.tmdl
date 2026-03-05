@@ -1,0 +1,160 @@
+table trips
+	lineageTag: fb901f3c-1fb5-4c78-b38b-c11131afe3ce
+	sourceLineageTag: [dbo].[trips]
+
+	column trip_id
+		dataType: string
+		lineageTag: 225a798c-815d-4604-8985-245b3afff38d
+		sourceLineageTag: trip_id
+		summarizeBy: none
+		sourceColumn: trip_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_number
+		dataType: string
+		lineageTag: 57c9327e-a82c-44e9-9a16-455a15219f24
+		sourceLineageTag: trip_number
+		summarizeBy: none
+		sourceColumn: trip_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column driver_id
+		dataType: string
+		lineageTag: 8b91c86c-4cd7-44df-ba88-a1b1a8cde322
+		sourceLineageTag: driver_id
+		summarizeBy: none
+		sourceColumn: driver_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column truck_id
+		dataType: string
+		lineageTag: baae66cd-3ee5-4932-ae1d-cc104ff9e478
+		sourceLineageTag: truck_id
+		summarizeBy: none
+		sourceColumn: truck_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column trailer_id
+		dataType: string
+		lineageTag: 71bda97e-388b-4be3-ac72-8738b1974bc0
+		sourceLineageTag: trailer_id
+		summarizeBy: none
+		sourceColumn: trailer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_id
+		dataType: string
+		lineageTag: 2e0aa4a8-e14c-45d0-b5bb-138dcaa6edfe
+		sourceLineageTag: load_id
+		summarizeBy: none
+		sourceColumn: load_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column route_id
+		dataType: string
+		lineageTag: 1780df7f-6147-432e-bf6e-fb80ae8b376e
+		sourceLineageTag: route_id
+		summarizeBy: none
+		sourceColumn: route_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: 9448d02b-f925-4a0c-a250-f4765b1b5811
+		sourceLineageTag: status
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column scheduled_departure
+		dataType: string
+		lineageTag: 15d300f6-7982-40df-a64e-d04e77ed0abd
+		sourceLineageTag: scheduled_departure
+		summarizeBy: none
+		sourceColumn: scheduled_departure
+
+		annotation SummarizationSetBy = Automatic
+
+	column scheduled_arrival
+		dataType: string
+		lineageTag: b79023ee-28ae-4e4b-becc-f65a769bbf18
+		sourceLineageTag: scheduled_arrival
+		summarizeBy: none
+		sourceColumn: scheduled_arrival
+
+		annotation SummarizationSetBy = Automatic
+
+	column actual_departure
+		dataType: string
+		lineageTag: 3d8624d4-af35-43c1-85f0-d68b3b069cac
+		sourceLineageTag: actual_departure
+		summarizeBy: none
+		sourceColumn: actual_departure
+
+		annotation SummarizationSetBy = Automatic
+
+	column actual_arrival
+		dataType: string
+		lineageTag: 70c13f91-2189-4a15-9553-6d3206d80698
+		sourceLineageTag: actual_arrival
+		summarizeBy: none
+		sourceColumn: actual_arrival
+
+		annotation SummarizationSetBy = Automatic
+
+	column current_latitude
+		dataType: double
+		lineageTag: 330ca875-7727-4ee2-9aa7-771491d57d62
+		sourceLineageTag: current_latitude
+		summarizeBy: sum
+		sourceColumn: current_latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column current_longitude
+		dataType: double
+		lineageTag: 32a45da2-569a-4e2b-9a86-5bd9e24831e7
+		sourceLineageTag: current_longitude
+		summarizeBy: sum
+		sourceColumn: current_longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column odometer_start
+		dataType: int64
+		formatString: 0
+		lineageTag: 59c38ddc-9c16-44b8-812e-2a8d56d7b676
+		sourceLineageTag: odometer_start
+		summarizeBy: sum
+		sourceColumn: odometer_start
+
+		annotation SummarizationSetBy = Automatic
+
+	column odometer_end
+		dataType: int64
+		formatString: 0
+		lineageTag: d4840275-0fde-4127-b509-51744158015e
+		sourceLineageTag: odometer_end
+		summarizeBy: sum
+		sourceColumn: odometer_end
+
+		annotation SummarizationSetBy = Automatic
+
+	partition trips = entity
+		mode: directLake
+		source
+			entityName: trips
+			expressionSource: 'DirectLake - lh_trucking'
+

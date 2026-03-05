@@ -1,0 +1,109 @@
+table routes
+	lineageTag: aea59e65-f0d6-470f-81d4-0c44f5e7c3c1
+	sourceLineageTag: [dbo].[routes]
+
+	column route_id
+		dataType: string
+		lineageTag: f03ff0b4-9cf9-442f-9564-a6becb81c5e5
+		sourceLineageTag: route_id
+		summarizeBy: none
+		sourceColumn: route_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column route_name
+		dataType: string
+		lineageTag: 6c879579-e993-4de7-98f9-ed1fd3629c4c
+		sourceLineageTag: route_name
+		summarizeBy: none
+		sourceColumn: route_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column origin_terminal_id
+		dataType: string
+		lineageTag: c064c73d-d97b-4e79-b76a-b31001c62a4c
+		sourceLineageTag: origin_terminal_id
+		summarizeBy: none
+		sourceColumn: origin_terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column destination_terminal_id
+		dataType: string
+		lineageTag: 17ba38e4-027f-45de-9138-3a69db102462
+		sourceLineageTag: destination_terminal_id
+		summarizeBy: none
+		sourceColumn: destination_terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column distance_miles
+		dataType: double
+		lineageTag: 580dbe31-3cc9-4d96-8004-4ddda61f49b1
+		sourceLineageTag: distance_miles
+		summarizeBy: sum
+		sourceColumn: distance_miles
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column estimated_hours
+		dataType: double
+		lineageTag: 7537bb85-01da-4052-bce0-ce5856bb780d
+		sourceLineageTag: estimated_hours
+		summarizeBy: sum
+		sourceColumn: estimated_hours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column estimated_hours_with_stops
+		dataType: double
+		lineageTag: 3dd7c0da-0718-4a24-8039-91aed74e35e3
+		sourceLineageTag: estimated_hours_with_stops
+		summarizeBy: sum
+		sourceColumn: estimated_hours_with_stops
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column waypoints
+		dataType: string
+		lineageTag: c34b104a-8e3e-4a9c-97b7-4a660a26808c
+		sourceLineageTag: waypoints
+		summarizeBy: none
+		sourceColumn: waypoints
+
+		annotation SummarizationSetBy = Automatic
+
+	column toll_cost_estimate
+		dataType: double
+		lineageTag: 875adc3e-8512-4f9b-8752-d229cfd5a233
+		sourceLineageTag: toll_cost_estimate
+		summarizeBy: sum
+		sourceColumn: toll_cost_estimate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fuel_stops_recommended
+		dataType: int64
+		formatString: 0
+		lineageTag: 66fc9741-6283-44bb-b297-5d31384146b5
+		sourceLineageTag: fuel_stops_recommended
+		summarizeBy: sum
+		sourceColumn: fuel_stops_recommended
+
+		annotation SummarizationSetBy = Automatic
+
+	partition routes = entity
+		mode: directLake
+		source
+			entityName: routes
+			expressionSource: 'DirectLake - lh_trucking'
+
