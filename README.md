@@ -1,8 +1,8 @@
 # Building an Ontology in Microsoft Fabric: A Trucking Domain Walkthrough
 
 > **Companion tutorial for the `trucking-ontology` GitHub repository.**
-> Run `notebooks/00_demo_setup.ipynb` in your Fabric workspace before following the steps below.
-
+>
+> **Want to jump straight into setup?** → [Go to Prerequisites & Environment Setup](#4-prerequisites--environment-setup)
 ---
 
 ## Table of Contents
@@ -23,7 +23,7 @@
 ## 1. What Is an Ontology?
 
 <p align="center">
-  <img src=".imgs/ontology_noun.png" alt="Ontology concept diagram" width="480" />
+  <img src=".imgs/ontology_colorful.png" alt="Ontology concept diagram" width="480" />
 </p>
 
 The word *ontology* comes from philosophy, where it means "the study of what exists." In data and analytics, it means something far more practical:
@@ -58,7 +58,7 @@ Before building, ask three questions:
 | `Driver operates Truck` | `Driver made-by Truck` |
 | `Trip originates-from Terminal` | `Trip linked Terminal` |
 
-Follow the "many-to-few" direction: the entity that performs many instances of an action points toward the entity it acts on. This makes graph traversal intuitive and your model readable by humans and AI alike.
+Follow the "many-to-one" direction: the entity that performs many instances of an action points toward the entity it acts on. This makes graph traversal intuitive and your model readable by humans and AI alike.
 
 ---
 
@@ -96,7 +96,7 @@ This demo models a **long-haul trucking company** with a fleet of trucks, driver
 | `Load` | Lakehouse → Delta table | Freight assignments per trip |
 | `Customer` | Lakehouse → Delta table | Shippers who own the loads |
 
-### Event Streams (added in Step 3)
+### Event Data
 
 | Event Table | Source | Description |
 |-------------|--------|-------------|
@@ -128,15 +128,16 @@ The event generator injects five realistic scenarios you can query through the o
 | Workspace role | Contributor or higher (Admin recommended) |
 | Tenant settings enabled | Ontology item (preview), Graph (preview), Data agent (preview), Copilot / Azure OpenAI |
 
+> There's a full list of pre-requesites stated in 00_demo_setup.ipynb before running. 
 ### Upload Notebooks to Fabric
 
-Before running anything, upload all three notebooks from this repository to your Fabric workspace:
+Before running anything, upload all three notebooks from the [`notebooks/`](notebooks/) folder in this repository to your Fabric workspace:
 
 | Notebook | Purpose |
 |----------|---------|
 | `notebooks/00_demo_setup.ipynb` | Main setup orchestrator — run this one |
-| `notebooks/01_load_reference_data.ipynb` | Called automatically by Step 3 |
-| `notebooks/02_generate_events.ipynb` | Called automatically by Step 6 |
+| `notebooks/01_load_reference_data.ipynb` | Creates delta tables in lakehouse |
+| `notebooks/02_generate_events.ipynb` | Hydrates Eventhouse tables with event data |
 
 To upload:
 1. In your Fabric workspace, click **+ New item** → **Import notebook**
@@ -191,6 +192,54 @@ Once provisioning completes, Fabric will have created:
 | Properties | One per column, with types inferred from the model |
 | Relationships | Inferred from the model’s existing joins and foreign key relationships |
 | Data bindings | Each entity type bound to its source Lakehouse Delta table via Direct Lake |
+
+### 5.3 Validate and Fix Relationships & Entity Keys
+
+After the ontology is generated, open it in the editor and review each entity type. Fabric auto-generates relationship names from the column join definitions in the semantic model — these are often generic and should be renamed to follow the active-verb convention before publishing.
+
+#### Entity Key Validation
+
+Verify the **key property** is set correctly for each entity type:
+
+| Entity Type | Key Property |
+|-------------|-------------|
+| `Truck` | `truck_id` |
+| `Driver` | `driver_id` |
+| `Trip` | `trip_id` |
+| `Route` | `route_id` |
+| `Terminal` | `terminal_id` |
+| `Load` | `load_id` |
+| `Customer` | `customer_id` |
+| `Trailer` | `trailer_id` |
+
+To check: click each entity type → open **Properties** → confirm the key icon (🔑) is on the correct column.
+
+> ⚠️ **The ontology does not always pick the correct primary key automatically.** After generation, go through every entity type and verify the key is set to the correct column. If it is wrong, click the column that should be the key and set it manually. Using the wrong key will cause relationship joins and graph queries to return incorrect or empty results.
+
+#### Relationship Reference Table
+
+Use this table to validate and rename each auto-generated relationship. Select each relationship edge in the canvas, open its properties, and update the name to match the **Relationship Type Name** column below.
+
+| Initial Relationship | Relationship Type Name | Source Data Table | Source Entity (One) | Source Key | Target Entity (Many) | Target Key |
+|----------------------|----------------------|------------------|--------------------|-----------|--------------------|-----------|
+| drivers_has_driver_hos_logs | Driver logs HOSLog | `drivers` | Driver | `driver_id` | HOSLog | `driver_id` |
+| customers_has_loads | Customer places Load | `customers` | Customer | `customer_id` | Load | `customer_id` |
+| trips_has_loads | Trip carries Load | `trips` | Trip | `load_id` | Load | `load_id` |
+| drivers_has_trips | Driver performs Trip | `drivers` | Driver | `driver_id` | Trip | `driver_id` |
+| routes_has_trips | Route guides Trip | `routes` | Route | `route_id` | Trip | `route_id` |
+| trucks_has_trips | Truck performs Trip | `trucks` | Truck | `truck_id` | Trip | `truck_id` |
+| trailers_has_trips | Trailer hauls Trip | `trailers` | Trailer | `trailer_id` | Trip | `trailer_id` |
+| terminals_has_routes (destination) | Terminal receives Route | `terminals` | Terminal | `terminal_id` | Route | `destination_terminal_id` |
+| terminals_has_routes (origin) | Terminal originates Route | `terminals` | Terminal | `terminal_id` | Route | `origin_terminal_id` |
+
+> **Note:** The `terminals → routes (origin)` relationship is marked **inactive** in the semantic model. You will need to manually enable it in the ontology editor and set the join key to `routes.origin_terminal_id`.
+
+#### How to Rename a Relationship
+
+1. Click the relationship edge on the canvas
+2. In the **Properties** panel on the right, find the **Name** field
+3. Update it to the active-verb name from the table above (e.g. `Truck performs Trip`)
+4. Click **Save**
 
 ## 6. Step 2 — Explore What Was Created
 
