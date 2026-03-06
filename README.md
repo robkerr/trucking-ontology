@@ -398,6 +398,8 @@ Add a few suggested questions to help users get started:
 
 ## 9. Step 5 — See the Data Agent Work with the Ontology
 
+
+
 ### 9.1 Natural Language to Graph Query
 
 Ask the agent in plain English:
@@ -422,14 +424,27 @@ Use the agent to investigate the injected scenarios:
 | *"Which drivers need a break soon?"* | `Driver → HOSStatusChangeEvent` where `driving_hours_remaining < 1.0` |
 | *"What truck needs maintenance most urgently?"* | `Truck` where `odometer_miles >= next_maintenance_miles` |
 | *"Which loads have been reassigned today?"* | `Load → LoadStatusEvent` where notes contain "reassignment" |
+| *"What is the count of trucks by make and model?"* | `Truck` applying a SUM and Group by to the query" |
+| *"Give me a list of drivers."* | `Drivers` return a simple list from a single Entity" |
+
 
 ### 9.3 Graph Traversal Example
 
 Ask a multi-hop question that requires traversing several relationships:
 
-> *"For the driver closest to their HOS limit, what load are they carrying and which customer does it belong to?"*
+> 1. *"For the driver closest to their HOS limit, what load are they carrying and which customer does it belong to?"*
 
 This requires traversing: `Driver → HOSStatusChangeEvent` (to find the at-risk driver) → `Trip` (via `Driver operates Truck → Trip`) → `Load` → `Customer` — four hops in a single graph query that would require four SQL joins without the ontology.
+
+
+> 2. *"List the driver, customer, load description and load value for trips currently in progress.* 
+
+This requires two traversals within a single query: 
+`Trip → Load [Value] → Customer [Name]` - from Trip to Load to Customer to obtain the Load.value and Customer.Name
+`Trip → Driver [Name]`  - to obtain the Driver.first_name and Driver.last_name
+
+The overal query is limited by the current trip status:
+where `Trip.status = "in_progress"`
 
 ---
 
@@ -474,6 +489,8 @@ Use Power BI connected to the semantic model + KQL querysets to build operationa
 | Sample KQL queries | `sample_queries.kql` |
 | Semantic model project | `semantic_model_project/TruckingSM.SemanticModel/` |
 | Reference data scripts | `scripts/generate_reference_data.py` |
+| [YouTube: Extending the Ontology with Realtime Telematics](https://youtu.be/6V9mDSNoXz4) |
+| [YouTube: Integrating the Data Agent with a Multi-source Foundry Agent](https://youtu.be/ognvJ6oKW-M) |
 
 ---
 
