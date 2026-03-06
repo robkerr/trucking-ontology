@@ -55,10 +55,10 @@ Before building, ask three questions:
 | ✅ Good | ❌ Avoid |
 |---------|---------|
 | `Truck performs Trip` | `Truck assigned-to Trip` |
-| `Driver operates Truck` | `Driver made-by Truck` |
+| `Driver operates Truck` | `Truck Driven By Driver` |
 | `Trip originates-from Terminal` | `Trip linked Terminal` |
 
-Follow the "many-to-one" direction: the entity that performs many instances of an action points toward the entity it acts on. This makes graph traversal intuitive and your model readable by humans and AI alike.
+The entity that performs many instances of an action points toward the entity it acts on. This makes graph traversal intuitive and your model readable by humans and AI alike.
 
 ---
 
@@ -126,7 +126,7 @@ The event generator injects five realistic scenarios you can query through the o
 |-------------|--------|
 | Microsoft Fabric workspace | F16 capacity minimum |
 | Workspace role | Contributor or higher (Admin recommended) |
-| Tenant settings enabled | Ontology item (preview), Graph (preview), Data agent (preview), Copilot / Azure OpenAI |
+| Tenant settings enabled | Graph (preview), Ontology item (preview), Data agent (preview), Copilot / Azure OpenAI |
 
 > There's a full list of pre-requesites stated in 00_demo_setup.ipynb before running. 
 ### Upload Notebooks to Fabric
@@ -144,7 +144,7 @@ To upload:
 2. Select all three `.ipynb` files from the `notebooks/` folder
 3. Confirm they appear in your workspace before proceeding
 
-> All three notebooks must be in the **same workspace**. Steps 3 and 6 of the setup notebook invoke the child notebooks by name via `notebookutils.notebook.run()` — if they are missing, those steps will fail.
+> `00_demo_setup` will automatically call the other two notebooks — you only need to open and run `00_demo_setup` yourself. Specifically, Steps 3 and 6 of `00_demo_setup` invoke the other two notebooks via `notebookutils.notebook.run()`, so all three must be in the **same workspace** or those steps will fail.
 
 ### Run the Setup Notebook
 
