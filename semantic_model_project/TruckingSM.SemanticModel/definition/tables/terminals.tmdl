@@ -1,0 +1,106 @@
+table terminals
+	lineageTag: 4d52fe41-36f9-46e1-ab04-2d31af69c198
+	sourceLineageTag: [dbo].[terminals]
+
+	column terminal_id
+		dataType: string
+		lineageTag: dde13e0e-3919-40fc-88bd-3979b41531f7
+		sourceLineageTag: terminal_id
+		summarizeBy: none
+		sourceColumn: terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column name
+		dataType: string
+		lineageTag: 2a5de016-85d1-463d-b471-041df6f9d98a
+		sourceLineageTag: name
+		summarizeBy: none
+		sourceColumn: name
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 2c100069-18f6-4a02-ab6c-0c62cdabcfd8
+		sourceLineageTag: city
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state
+		dataType: string
+		lineageTag: 9c240eb0-74f4-4ee6-a7bc-f1f8e37f356f
+		sourceLineageTag: state
+		summarizeBy: none
+		sourceColumn: state
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		dataType: double
+		lineageTag: fa21b3be-8db3-4e81-ac0d-723493eceffc
+		sourceLineageTag: latitude
+		summarizeBy: none
+		sourceColumn: latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column longitude
+		dataType: double
+		lineageTag: 3b08ec60-cfe9-4a57-841a-74f3727c6101
+		sourceLineageTag: longitude
+		summarizeBy: none
+		sourceColumn: longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column timezone
+		dataType: string
+		lineageTag: cedf0530-19c2-4180-b5e0-332e9e232e18
+		sourceLineageTag: timezone
+		summarizeBy: none
+		sourceColumn: timezone
+
+		annotation SummarizationSetBy = Automatic
+
+	column capacity_trucks
+		dataType: int64
+		formatString: 0
+		lineageTag: 9b6f9578-5329-4a5b-90be-1347352bfd44
+		sourceLineageTag: capacity_trucks
+		summarizeBy: none
+		sourceColumn: capacity_trucks
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_maintenance_bay
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: cbe33e88-5763-4b74-b918-dc9bceae6c97
+		sourceLineageTag: has_maintenance_bay
+		summarizeBy: none
+		sourceColumn: has_maintenance_bay
+
+		annotation SummarizationSetBy = Automatic
+
+	column address
+		dataType: string
+		lineageTag: 3f90c2ad-d764-487b-a15c-323a585a4e41
+		sourceLineageTag: address
+		summarizeBy: none
+		sourceColumn: address
+
+		annotation SummarizationSetBy = Automatic
+
+	partition terminals = entity
+		mode: directLake
+		source
+			entityName: terminals
+			expressionSource: 'DirectLake - lh_trucking'
+

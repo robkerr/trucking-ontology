@@ -1,0 +1,151 @@
+table driver_hos_logs
+	lineageTag: 040cf291-0d75-4057-a133-a05e754583d0
+	sourceLineageTag: [dbo].[driver_hos_logs]
+
+	column hos_log_id
+		dataType: string
+		lineageTag: 6dbc814e-79ad-412a-91a8-3d07b9ae58ae
+		sourceLineageTag: hos_log_id
+		summarizeBy: none
+		sourceColumn: hos_log_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column driver_id
+		dataType: string
+		lineageTag: 71782f88-c831-4fb2-9eff-4e70663221bc
+		sourceLineageTag: driver_id
+		summarizeBy: none
+		sourceColumn: driver_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column trip_id
+		dataType: string
+		lineageTag: cfec8d84-1c52-47a6-8322-bb1c005180ac
+		sourceLineageTag: trip_id
+		summarizeBy: none
+		sourceColumn: trip_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column duty_status
+		dataType: string
+		lineageTag: d3d93cac-1835-4649-860a-9ab6b266fbdf
+		sourceLineageTag: duty_status
+		summarizeBy: none
+		sourceColumn: duty_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column start_time
+		dataType: string
+		lineageTag: 9c1eac4d-fe03-45d1-9836-d8bf11bd96b8
+		sourceLineageTag: start_time
+		summarizeBy: none
+		sourceColumn: start_time
+
+		annotation SummarizationSetBy = Automatic
+
+	column end_time
+		dataType: string
+		lineageTag: 81eeb0a5-908c-4e87-af27-92960aa501db
+		sourceLineageTag: end_time
+		summarizeBy: none
+		sourceColumn: end_time
+
+		annotation SummarizationSetBy = Automatic
+
+	column start_latitude
+		dataType: double
+		lineageTag: 2f50b19e-0421-4c0a-9abf-aa2b2df34cf8
+		sourceLineageTag: start_latitude
+		summarizeBy: sum
+		sourceColumn: start_latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column start_longitude
+		dataType: double
+		lineageTag: cb97a2fd-6412-4783-b575-d5a2a7ad37c8
+		sourceLineageTag: start_longitude
+		summarizeBy: sum
+		sourceColumn: start_longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column start_odometer
+		dataType: int64
+		formatString: 0
+		lineageTag: e54167bf-732b-494d-9c9f-751ccfa1ffac
+		sourceLineageTag: start_odometer
+		summarizeBy: sum
+		sourceColumn: start_odometer
+
+		annotation SummarizationSetBy = Automatic
+
+	column driving_hours_used
+		dataType: double
+		lineageTag: fb37ca5a-e79e-4e37-9639-fcd25723f292
+		sourceLineageTag: driving_hours_used
+		summarizeBy: sum
+		sourceColumn: driving_hours_used
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column duty_hours_used
+		dataType: double
+		lineageTag: 08fffe5b-f204-4212-b46d-33b7982bb0d9
+		sourceLineageTag: duty_hours_used
+		summarizeBy: sum
+		sourceColumn: duty_hours_used
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cycle_hours_used
+		dataType: double
+		lineageTag: fc503e26-5356-414f-918f-4c9da2aa3e32
+		sourceLineageTag: cycle_hours_used
+		summarizeBy: sum
+		sourceColumn: cycle_hours_used
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column driving_hours_remaining
+		dataType: double
+		lineageTag: 63aaa15b-d688-49d8-876a-bdc572744d17
+		sourceLineageTag: driving_hours_remaining
+		summarizeBy: sum
+		sourceColumn: driving_hours_remaining
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column duty_hours_remaining
+		dataType: double
+		lineageTag: 935c38c8-b251-4ef4-9a6f-1a7c928c1f03
+		sourceLineageTag: duty_hours_remaining
+		summarizeBy: sum
+		sourceColumn: duty_hours_remaining
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition driver_hos_logs = entity
+		mode: directLake
+		source
+			entityName: driver_hos_logs
+			expressionSource: 'DirectLake - lh_trucking'
+

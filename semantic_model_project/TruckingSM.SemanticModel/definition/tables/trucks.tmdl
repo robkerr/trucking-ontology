@@ -1,0 +1,131 @@
+table trucks
+	lineageTag: b569823e-f56d-4392-b862-e53245ca2251
+	sourceLineageTag: [dbo].[trucks]
+
+	column truck_id
+		dataType: string
+		lineageTag: 6b0e85f9-5b56-4055-8611-5342972dd779
+		sourceLineageTag: truck_id
+		summarizeBy: none
+		sourceColumn: truck_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column truck_number
+		dataType: string
+		lineageTag: 070f7ce5-c041-43c5-bfc3-5dd1bcd45f57
+		sourceLineageTag: truck_number
+		summarizeBy: none
+		sourceColumn: truck_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column vin
+		dataType: string
+		lineageTag: e1655865-2048-4606-b05e-e165058bb775
+		sourceLineageTag: vin
+		summarizeBy: none
+		sourceColumn: vin
+
+		annotation SummarizationSetBy = Automatic
+
+	column make
+		dataType: string
+		lineageTag: 77e9c76a-c601-4e46-82d7-75783c7249ee
+		sourceLineageTag: make
+		summarizeBy: none
+		sourceColumn: make
+
+		annotation SummarizationSetBy = Automatic
+
+	column model
+		dataType: string
+		lineageTag: dfb90c65-7dc9-40bb-a83e-9e352ee73f84
+		sourceLineageTag: model
+		summarizeBy: none
+		sourceColumn: model
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: a767bc25-8039-40d0-828a-1a17ef10058b
+		sourceLineageTag: year
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column odometer_miles
+		dataType: int64
+		formatString: 0
+		lineageTag: 6751d58b-8ecd-41b8-923a-1e91096b8170
+		sourceLineageTag: odometer_miles
+		summarizeBy: none
+		sourceColumn: odometer_miles
+
+		annotation SummarizationSetBy = Automatic
+
+	column fuel_capacity_gallons
+		dataType: int64
+		formatString: 0
+		lineageTag: 3cc32799-443a-454a-a084-731e6477f80a
+		sourceLineageTag: fuel_capacity_gallons
+		summarizeBy: none
+		sourceColumn: fuel_capacity_gallons
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: c96434d7-f617-4bfa-8b3c-6e4556bdf7f8
+		sourceLineageTag: status
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column home_terminal_id
+		dataType: string
+		lineageTag: c0ad3ead-693a-4cca-b2bb-1df059749158
+		sourceLineageTag: home_terminal_id
+		summarizeBy: none
+		sourceColumn: home_terminal_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column next_maintenance_miles
+		dataType: int64
+		formatString: 0
+		lineageTag: 51858458-6b27-4acc-82a4-0042896149e1
+		sourceLineageTag: next_maintenance_miles
+		summarizeBy: none
+		sourceColumn: next_maintenance_miles
+
+		annotation SummarizationSetBy = Automatic
+
+	column next_maintenance_type
+		dataType: string
+		lineageTag: 35557aa9-40c6-4607-91c2-0a7ae85734f7
+		sourceLineageTag: next_maintenance_type
+		summarizeBy: none
+		sourceColumn: next_maintenance_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column last_dot_inspection_date
+		dataType: string
+		lineageTag: 0853e008-bb8f-4af1-9c5e-552e7b30819a
+		sourceLineageTag: last_dot_inspection_date
+		summarizeBy: none
+		sourceColumn: last_dot_inspection_date
+
+		annotation SummarizationSetBy = Automatic
+
+	partition trucks = entity
+		mode: directLake
+		source
+			entityName: trucks
+			expressionSource: 'DirectLake - lh_trucking'
+
