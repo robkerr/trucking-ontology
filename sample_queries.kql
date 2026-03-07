@@ -6,3 +6,10 @@ trip.trip_number,
 trip.scheduled_departure,
 trip.actual_departure
 
+
+MATCH (trip:Trip)-[:TripHasDriver]->(driver:Driver)
+WHERE trip.status = "in_progress"
+RETURN 
+trip.trip_number, trip.status, 
+trip.current_latitude, trip.current_longitude,
+driver.last_name, driver.phone
