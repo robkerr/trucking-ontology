@@ -1,0 +1,79 @@
+If you've been paying attention to what's new in Microsoft Fabric, you've probably noticed a new item type showing up in your workspace — the Ontology. 
+
+And if you're like most people, this may be the first time you’ve heard about Ontologies and want to know how an Ontology fits into your analytical strategy. 
+
+In a previous video, which I linked to in the description, I covered the new Fabric Graph Model – which is one of the Fabric items Ontologies are built on. If you haven’t checked out that video, make sure to review it, as it will provide more context to this one. 
+
+In this video, I'm going to break down what an ontology actually is in the context of data analysis, walk you through how to design one, and then we'll build one together inside Fabric — step by step. 
+
+And if you’d like to work through the same Ontology design in your environment after we’ve finished, the source data and code are on GitHub — link in the description. 
+
+ 
+
+So — what is an ontology? The word comes from philosophy, where it literally means 'the study of what exists.' But in data and analytics, it means something much more practical. 
+
+An ontology is a structured representation of the things in your business, the properties those things have, and the relationships between them. Think of it as a map of your business domain — not the data itself, but the meaning behind the data. 
+
+Now here's where it gets interesting. A well-designed ontology in a data analysis context brings together three layers: 
+
+First — Data. This is the information you use to make a decision. Your tables, your events, your telemetry. The raw material. 
+
+Second — Logic. This is the reasoning you apply to evaluate a decision. Business rules, constraints, thresholds — the 'if this, then that' of your domain. 
+
+Third — Action. This is the execution of the decision. What happens when the logic says 'go.' An alert fires, a workflow kicks off, an agent takes a step. 
+
+Most analytics platforms stop at Data. Maybe they get you partway into Logic with some calculated measures or KPIs. But an ontology connects all three — and that's what makes it powerful. It's not just a semantic layer. It's a decision layer. 
+
+ 
+
+Now, ontologies aren't a new idea. Knowledge graphs have been around for years. But what Microsoft is doing with the Ontology item in Fabric is making this accessible inside the platform you're already using for analytics. 
+
+The ontology in Fabric is part of the IQ workload. You define entity types — like a Customer, an Order, a Truck, a Sensor — and you give them properties and relationships. Then you bind those definitions to your actual data in OneLake. Lakehouse tables, Eventhouse streams, semantic models — it all connects. 
+
+What you get is a queryable graph where relationships are first-class citizens. They're not buried in join logic or foreign key lookups. They're explicit, governed, and navigable. And because it's Fabric, queries get pushed down to the native engines — GQL for the graph, KQL for the event data — so it performs at scale. 
+
+And here's the kicker — the ontology also supports natural language queries. You can ask business questions in plain English, and the Natural Language 2 `Ontology layer translates that into structured queries against your ontology. That's a big deal for business users and AI agents alike. 
+
+ 
+
+Alright, let's talk about design. Because the number one mistake people make with ontologies is jumping straight into the tool without thinking through the model first. 
+
+Designing an ontology comes down to three questions. What are the things in my domain? What properties do those things have? And how do those things relate to each other? 
+
+Let's say we're modeling a trucking company. Our entities might be Truck, Driver, Trip, and Location. Each of those has properties — a Truck has a VIN, a capacity, a status. A Trip has an origin, a destination, a departure time. 
+
+Now — relationships. And this is where good design really matters. The best practice from ontology and graph modeling is to name your relationships as active verbs that read naturally as a sentence. 
+
+So instead of some vague link between Truck and Trip, you define: Truck performs Trip. That reads like a sentence. It has a clear direction. And it follows the natural 'many-to-few' pattern — one truck performs many trips over time. 
+
+You can optionally define the inverse — Trip performed-by Truck. But the primary relationship should always be that active, verb-based edge. Avoid passive phrasing like 'made-by' or 'assigned-to' as your primary direction — those obscure the semantics and make traversal harder. 
+
+In practice with Fabric's ontology, use the active relationship as your canonical edge, and let the graph traversal handle reverse queries. Don't duplicate semantics unless you have a specific reason for it — like a policy rule or an inference pattern. 
+
+ 
+
+OK — so we know what an ontology is, we know why it matters in Fabric, and we've talked through the design principles. Now let's actually build one. 
+
+I'm going to switch over to Fabric and walk through the full implementation — creating entity types, binding data, defining relationships, and then exploring the graph. Stay with me. 
+
+ 
+
+[DEMO PLACEHOLDER] 
+
+ 
+
+So there you have it — your first ontology in Microsoft Fabric. 
+
+Let's recap what we covered. An ontology is a structured model of your business domain — the things, their properties, and how they relate. In a data analysis context, it ties together Data, Logic, and Action into a single, queryable layer. 
+
+We walked through the design principles — starting with entities, giving them meaningful properties, and connecting them with active, verb-based relationships that read like sentences. 
+
+And then we built it out in Fabric — from entity types to data bindings to a live, navigable graph. 
+
+Look for future videos where we’ll dig into additional Ontology features – like enabling Natural Language Ontology queries, and enabling realtime events alerts and actions. 
+
+This is still in preview, so expect it to evolve. But the foundation is solid, and if you start modeling your domain now, you'll be well ahead of the curve when this goes GA. 
+
+All the source data and code are on GitHub — check the description for links. Download it, spin up your own workspace, and try building an ontology for your domain. 
+
+If this was helpful, hit that like button, subscribe if you haven't already, and drop a comment if you have questions or want to see a deeper dive on any part of this. I'll see you in the next one. 

@@ -10,7 +10,7 @@ annotation PBI_QueryOrder = ["DirectLake - lh_trucking"]
 
 annotation __PBI_TimeIntelligenceEnabled = 1
 
-annotation PBI_ProTooling = ["RemoteModeling","DirectLakeOnOneLakeCreatedInDesktop","DevMode"]
+annotation PBI_ProTooling = ["RemoteModeling","DirectLakeOnOneLakeCreatedInDesktop","DevMode","DirectLakeOnOneLakeInWeb","WebModelingEdit"]
 
 ref table terminals
 ref table customers
@@ -20,5 +20,4 @@ ref table drivers
 ref table routes
 ref table loads
 ref table trips
-ref table driver_hos_logs
 
