@@ -265,7 +265,7 @@ Once the import is complete, take a moment to understand the graph that was buil
 
 The Ontology editor's **canvas view** shows your entities as nodes and relationships as directed edges. You should see:
 
-- **7 entity nodes** connected by relationship edges
+- **8 entity nodes** connected by relationship edges
 - Properties panel on the right when you click any node
 - Relationship labels on each edge
 
@@ -287,15 +287,17 @@ Click on **Truck**. In the properties panel you'll see:
 
 ### 6.3 Try a Graph Query
 
-In the **Query** pane, try a GQL query to traverse the graph:
+In the Relationship graph, click on **Expand**. On **Query builder**, you can try connecting the nodes or you can open **Code editor** and paste the code below to try a GQL query to traverse the graph:
 
 ```gql
-MATCH (t:Truck)-[:performs]->(trip:Trip)-[:carries]->(l:Load)
-WHERE t.status = 'active'
-RETURN t.truck_number, trip.trip_number, l.load_number
+MATCH (node_Truck:`Truck`)-[edge1_TruckMakesTrip:`TruckMakesTrip`]->(node_Trip:`Trip`),
+      (node_Trip:`Trip`)-[edge2_TripCarriesLoad:`TripCarriesLoad`]->(node_Load:`Load`)
+WHERE node_Truck.status = 'available'
+RETURN node_Truck.truck_number, node_Trip.trip_number, node_Load.load_number
+LIMIT 1000
 ```
 
-This retrieves all active trucks, the trips they're currently performing, and the loads they're carrying — in one graph traversal, no SQL joins required.
+This retrieves all available trucks, the trips they're currently performing, and the loads they're carrying — in one graph traversal, no SQL joins required.
 
 ---
 
