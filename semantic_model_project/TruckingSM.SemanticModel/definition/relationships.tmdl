@@ -27,3 +27,7 @@ relationship 649b58f4-22f8-9fb0-e440-59ac56cd91d0
 	fromColumn: trips.driver_id
 	toColumn: drivers.driver_id
 
+relationship b14971cf-e7ff-a48b-5765-2d8869e02fb8
+	fromColumn: loads.customer_id
+	toColumn: customers.customer_id
+

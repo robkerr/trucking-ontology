@@ -52,7 +52,7 @@ table loads
 		formatString: 0
 		lineageTag: 58a5c2c4-d3fb-4e4c-9db4-7aac119e06c8
 		sourceLineageTag: weight_lbs
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: weight_lbs
 
 		annotation SummarizationSetBy = Automatic
@@ -142,7 +142,7 @@ table loads
 		dataType: double
 		lineageTag: b1043491-155f-4fec-b95a-46591f39e1ed
 		sourceLineageTag: value_usd
-		summarizeBy: none
+		summarizeBy: sum
 		sourceColumn: value_usd
 
 		annotation SummarizationSetBy = Automatic
