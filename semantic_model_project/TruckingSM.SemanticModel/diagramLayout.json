@@ -23,19 +23,6 @@
         },
         {
           "location": {
-            "x": 42.5,
-            "y": 2.75
-          },
-          "nodeIndex": "driver_hos_logs",
-          "nodeLineageTag": "040cf291-0d75-4057-a133-a05e754583d0",
-          "size": {
-            "height": 300,
-            "width": 234
-          },
-          "zIndex": 2
-        },
-        {
-          "location": {
             "x": 588.25,
             "y": 0
           },

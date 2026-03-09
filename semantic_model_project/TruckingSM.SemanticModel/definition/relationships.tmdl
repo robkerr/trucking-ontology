@@ -1,33 +1,3 @@
-relationship a0207458-a793-01b2-750e-3936c236a96d
-	fromColumn: driver_hos_logs.driver_id
-	toColumn: drivers.driver_id
-
-relationship 4e4b189b-6bd4-d98b-5bc0-2f5c906bcb84
-	fromColumn: loads.customer_id
-	toColumn: customers.customer_id
-
-relationship 5442793c-74b9-8b0d-ce61-7be6f42a1ad7
-	crossFilteringBehavior: bothDirections
-	fromCardinality: one
-	fromColumn: trips.load_id
-	toColumn: loads.load_id
-
-relationship 18a0ffa9-0f17-e5b6-e1cb-f5160483622d
-	fromColumn: trips.driver_id
-	toColumn: drivers.driver_id
-
-relationship 95fba424-13df-cf3e-68cc-94cbcf172c8f
-	fromColumn: trips.route_id
-	toColumn: routes.route_id
-
-relationship b2877762-433c-1cc9-bb0b-70ae255e009f
-	fromColumn: trips.truck_id
-	toColumn: trucks.truck_id
-
-relationship f41737ec-5ec3-0632-36e9-64ef0cd74ce7
-	fromColumn: trips.trailer_id
-	toColumn: trailers.trailer_id
-
 relationship 44634c8c-cae4-1d99-2a63-8b90e30a653b
 	fromColumn: routes.destination_terminal_id
 	toColumn: terminals.terminal_id
@@ -36,4 +6,28 @@ relationship 64476d95-3d42-a7ac-9365-c50ace3cdfca
 	isActive: false
 	fromColumn: routes.origin_terminal_id
 	toColumn: terminals.terminal_id
+
+relationship cf3d12b9-198a-10a2-f0f7-6ba3c0d45c17
+	fromColumn: trips.route_id
+	toColumn: routes.route_id
+
+relationship a5a3733c-f341-c2dc-8116-78d71d6c0629
+	fromColumn: trips.truck_id
+	toColumn: trucks.truck_id
+
+relationship 8d391169-369e-2868-bf21-41f6670d840a
+	fromColumn: trips.load_id
+	toColumn: loads.load_id
+
+relationship 72147d32-2257-2fd4-dc0e-bcb7968d7727
+	fromColumn: trips.trailer_id
+	toColumn: trailers.trailer_id
+
+relationship 649b58f4-22f8-9fb0-e440-59ac56cd91d0
+	fromColumn: trips.driver_id
+	toColumn: drivers.driver_id
+
+relationship b14971cf-e7ff-a48b-5765-2d8869e02fb8
+	fromColumn: loads.customer_id
+	toColumn: customers.customer_id
 
