@@ -11,11 +11,11 @@
 2. [Ontologies in Microsoft Fabric](#2-ontologies-in-microsoft-fabric)
 3. [What We're Building](#3-what-were-building)
 4. [Prerequisites & Environment Setup](#4-prerequisites--environment-setup)
-5. [Step 1 — Create the Ontology from the Semantic Model](#5-step-1--create-the-ontology-from-the-semantic-model)
-6. [Step 2 — Explore What Was Created](#6-step-2--explore-what-was-created)
-7. [Step 3 — Add Event Data and Extra Relationships](#7-step-3--add-event-data-and-extra-relationships)
-8. [Step 4 — Create a Data Agent](#8-step-4--create-a-data-agent)
-9. [Step 5 — See the Data Agent Work with the Ontology](#9-step-5--see-the-data-agent-work-with-the-ontology)
+5. [Create the Ontology](#5-create-the-ontology)
+6. [Explore What Was Created](#6-explore-what-was-created)
+7. [Add Event Data and Extra Relationships](#7-add-event-data-and-extra-relationships)
+8. [Create a Data Agent](#8-create-a-data-agent)
+9. [See the Data Agent Work with the Ontology](#9-see-the-data-agent-work-with-the-ontology)
 10. [Next Steps](#10-next-steps)
 
 ---
@@ -88,13 +88,14 @@ This demo models a **long-haul trucking company** with a fleet of trucks, driver
 
 | Entity | Source | Description |
 |--------|--------|-------------|
-| `Truck` | Lakehouse → Delta table | Fleet vehicles with VIN, status, odometer |
-| `Driver` | Lakehouse → Delta table | Drivers with CDL endorsements, HOS state |
-| `Trip` | Lakehouse → Delta table | Scheduled movements between terminals |
-| `Route` | Lakehouse → Delta table | Origin/destination pairs with distance/hours |
-| `Terminal` | Lakehouse → Delta table | Distribution centers and depots |
-| `Load` | Lakehouse → Delta table | Freight assignments per trip |
-| `Customer` | Lakehouse → Delta table | Shippers who own the loads |
+| `Truck` | Lakehouse → `trucks` | Fleet vehicles with VIN, status, odometer |
+| `Driver` | Lakehouse → `drivers` | Drivers with CDL endorsements, HOS state |
+| `Trip` | Lakehouse → `trips` | Scheduled movements between terminals |
+| `Route` | Lakehouse → `routes` | Origin/destination pairs with distance/hours |
+| `Terminal` | Lakehouse → `terminals` | Distribution centers and depots |
+| `Load` | Lakehouse → `loads` | Freight assignments per trip |
+| `Customer` | Lakehouse → `customers` | Shippers who own the loads |
+| `Trailer` | Lakehouse → `trailers` | Trailers assigned to trips |
 
 ### Event Data
 
@@ -131,20 +132,21 @@ The event generator injects five realistic scenarios you can query through the o
 > There's a full list of pre-requesites stated in 00_demo_setup.ipynb before running. 
 ### Upload Notebooks to Fabric
 
-Before running anything, upload all three notebooks from the [`notebooks/`](notebooks/) folder in this repository to your Fabric workspace:
+Before running anything, upload all four notebooks from the [`notebooks/`](notebooks/) folder in this repository to your Fabric workspace:
 
 | Notebook | Purpose |
 |----------|---------|
 | `notebooks/00_demo_setup.ipynb` | Main setup orchestrator — run this one |
 | `notebooks/01_load_reference_data.ipynb` | Creates delta tables in lakehouse |
 | `notebooks/02_generate_events.ipynb` | Hydrates Eventhouse tables with event data |
+| `notebooks/03_create_ontology.ipynb` | Builds the trucking ontology via the Fabric REST API |
 
 To upload:
 1. In your Fabric workspace, click **+ New item** → **Import notebook**
-2. Select all three `.ipynb` files from the `notebooks/` folder
+2. Select all four `.ipynb` files from the `notebooks/` folder
 3. Confirm they appear in your workspace before proceeding
 
-> `00_demo_setup` will automatically call the other two notebooks — you only need to open and run `00_demo_setup` yourself. Specifically, Steps 3 and 6 of `00_demo_setup` invoke the other two notebooks via `notebookutils.notebook.run()`, so all three must be in the **same workspace** or those steps will fail.
+> `00_demo_setup` will automatically call the other notebooks — you only need to open and run `00_demo_setup` yourself. Steps 3, 6, and 7 (if `create_ontology = True`) invoke the other notebooks via `notebookutils.notebook.run()`, so all four must be in the **same workspace** or those steps will fail.
 
 ### Run the Setup Notebook
 
@@ -158,6 +160,7 @@ All infrastructure is provisioned automatically by **`notebooks/00_demo_setup.ip
 | **Step 4** | Deploys the `TruckingSM` Power BI Semantic Model with a Direct Lake connection to `lh_trucking` |
 | **Step 5** | Creates the `eh_trucking` Eventhouse and `trucking_db` KQL database, then creates the 5 event tables |
 | **Step 6** | Runs `02_generate_events.ipynb` — generates 1–10 minutes of synthetic event streams and ingests them into Eventhouse |
+| **Step 7** *(optional)* | Runs `03_create_ontology.ipynb` — creates the trucking ontology via the Fabric REST API. Only executes if `create_ontology = True` in the config cell. Set to `False` to create the ontology manually (see §5 Option 2). |
 
 > **Tip:** Every step is idempotent — safe to re-run if something fails partway through.
 
@@ -168,9 +171,24 @@ After the setup notebook completes, your workspace will contain:
 
 ---
 
-## 5. Step 1 — Create the Ontology from the Semantic Model
+## 5. Create the Ontology
 
-The fastest way to bootstrap an ontology in Fabric is directly from an existing Semantic Model. Fabric reads the model’s tables, columns, and relationships and pre-populates entity types, properties, and relationships automatically.
+The ontology defines the entity types and relationships that the Data Agent uses to understand your data. There are two ways to create it:
+
+### Option 1 — Run the Notebook (Automated)
+
+`03_create_ontology.ipynb` builds the full ontology programmatically via the Fabric REST API. This is the fastest path and is driven automatically by `00_demo_setup.ipynb` when `create_ontology = True` (the default).
+
+**What the notebook does:**
+1. Reads each Lakehouse table schema from `lh_trucking`
+2. Creates an **entity type** for each table using the key and display columns below
+3. Registers **relationship types** between entities
+
+When `create_ontology = True` in `00_demo_setup.ipynb`, Step 7 automatically runs this notebook. If you set `create_ontology = False`, skip to **Option 2** to create everything manually.
+
+### Option 2 — Create Manually from the Semantic Model
+
+If you prefer a UI-driven approach, you can generate the ontology interactively directly from the `TruckingSM` semantic model in Fabric. This requires `create_ontology = False` in `00_demo_setup.ipynb`.
 
 ### 5.1 Create the Ontology
 
@@ -201,16 +219,16 @@ After the ontology is generated, open it in the editor and review each entity ty
 
 Verify the **key property** is set correctly for each entity type:
 
-| Entity Type | Key Property |
-|-------------|-------------|
-| `Truck` | `truck_id` |
-| `Driver` | `driver_id` |
-| `Trip` | `trip_id` |
-| `Route` | `route_id` |
-| `Terminal` | `terminal_id` |
-| `Load` | `load_id` |
-| `Customer` | `customer_id` |
-| `Trailer` | `trailer_id` |
+| Entity Type | Key Property | Display Property |
+|-------------|-------------|-----------------|
+| `Customer` | `customer_id` | `name` |
+| `Driver` | `driver_id` | `last_name` |
+| `Load` | `load_id` | `load_number` |
+| `Route` | `route_id` | `route_name` |
+| `Terminal` | `terminal_id` | `name` |
+| `Trailer` | `trailer_id` | `trailer_number` |
+| `Trip` | `trip_id` | `trip_number` |
+| `Truck` | `truck_id` | `truck_number` |
 
 To check: click each entity type → open **Properties** → confirm the key icon (🔑) is on the correct column.
 
@@ -220,19 +238,17 @@ To check: click each entity type → open **Properties** → confirm the key ico
 
 Use this table to validate and rename each auto-generated relationship. Select each relationship edge in the canvas, open its properties, and update the name to match the **Relationship Type Name** column below.
 
-| Initial Relationship | Relationship Type Name | Source Data Table | Source Entity (One) | Source Key | Target Entity (Many) | Target Key |
-|----------------------|----------------------|------------------|--------------------|-----------|--------------------|-----------|
-| drivers_has_driver_hos_logs | Driver logs HOSLog | `drivers` | Driver | `driver_id` | HOSLog | `driver_id` |
-| customers_has_loads | Customer places Load | `customers` | Customer | `customer_id` | Load | `customer_id` |
-| trips_has_loads | Trip carries Load | `trips` | Trip | `load_id` | Load | `load_id` |
-| drivers_has_trips | Driver performs Trip | `drivers` | Driver | `driver_id` | Trip | `driver_id` |
-| routes_has_trips | Route guides Trip | `routes` | Route | `route_id` | Trip | `route_id` |
-| trucks_has_trips | Truck performs Trip | `trucks` | Truck | `truck_id` | Trip | `truck_id` |
-| trailers_has_trips | Trailer hauls Trip | `trailers` | Trailer | `trailer_id` | Trip | `trailer_id` |
-| terminals_has_routes (destination) | Terminal receives Route | `terminals` | Terminal | `terminal_id` | Route | `destination_terminal_id` |
-| terminals_has_routes (origin) | Terminal originates Route | `terminals` | Terminal | `terminal_id` | Route | `origin_terminal_id` |
+| Relationship Name | Source Data Table | Source Entity | Source Key | Target Entity | Target Key |
+|-------------------|-----------------|--------------|-----------|--------------|-----------|
+| `TripCarriesLoad` | `trips` | Trip | `trip_id` | Load | `load_id` |
+| `TripHasDriver` | `trips` | Trip | `trip_id` | Driver | `driver_id` |
+| `TripFollowsRoute` | `trips` | Trip | `trip_id` | Route | `route_id` |
+| `TruckMakesTrip` | `trips` | Truck | `truck_id` | Trip | `trip_id` |
+| `TripMovesTrailer` | `trips` | Trip | `trip_id` | Trailer | `trailer_id` |
+| `RouteOriginTerminal` | `routes` | Route | `route_id` | Terminal | `origin_terminal_id` |
+| `RouteDestinationTerminal` | `routes` | Route | `route_id` | Terminal | `destination_terminal_id` |
+| `LoadForCustomer` | `loads` | Load | `load_id` | Customer | `customer_id` |
 
-> **Note:** The `terminals → routes (origin)` relationship is marked **inactive** in the semantic model. You will need to manually enable it in the ontology editor and set the join key to `routes.origin_terminal_id`.
 
 #### How to Rename a Relationship
 
@@ -241,7 +257,7 @@ Use this table to validate and rename each auto-generated relationship. Select e
 3. Update it to the active-verb name from the table above (e.g. `Truck performs Trip`)
 4. Click **Save**
 
-## 6. Step 2 — Explore What Was Created
+## 6. Explore What Was Created
 
 Once the import is complete, take a moment to understand the graph that was built.
 
@@ -283,7 +299,7 @@ This retrieves all active trucks, the trips they're currently performing, and th
 
 ---
 
-## 7. Step 3 — Add Event Data and Extra Relationships
+## 7. Add Event Data and Extra Relationships
 
 The static reference data gives you the *structure* of your domain. The Eventhouse event tables give it *life* — real-time operational data flowing in continuously.
 
@@ -350,7 +366,7 @@ This finds every driver currently at risk of an HOS violation — combining stat
 
 ---
 
-## 8. Step 4 — Create a Data Agent
+## 8. Create a Data Agent
 
 A **Data Agent** in Fabric is an AI-powered conversational interface backed by your data. When you connect it to your ontology, it can answer natural language business questions by generating and executing graph queries.
 
@@ -396,7 +412,7 @@ Add a few suggested questions to help users get started:
 
 ---
 
-## 9. Step 5 — See the Data Agent Work with the Ontology
+## 9. See the Data Agent Work with the Ontology
 
 
 
