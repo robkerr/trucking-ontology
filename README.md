@@ -469,14 +469,14 @@ When answering questions:
 - For real-time questions (location, speed, HOS hours), use the event entity types
 - For operational questions (which truck, which driver, which load), use the reference entities
 - Always cite the data behind your answer
+- Do not return ids unless user ask for it
 ```
 
-### 8.4 Configure the Starting Questions
+### 8.4 Try out some starting questions
 
-Add a few suggested questions to help users get started:
+Some questions to help you validate the agent:
 
 - *Are any drivers close to their HOS limit right now?*
-- *What is the current status of load LN-0001?*
 - *Which trips are at risk of late arrival?*
 - *What have been the average RPM for trips originating from Atlanta?*
 
@@ -509,9 +509,9 @@ Use the agent to investigate the injected scenarios:
 | *"Is any truck broken down right now?"* | `Truck → EngineFaultEvent` with `severity = 'critical'` + `Truck` speed = 0 |
 | *"Which drivers need a break soon?"* | `Driver → HOSStatusChangeEvent` where `driving_hours_remaining < 1.0` |
 | *"What truck needs maintenance most urgently?"* | `Truck` where `odometer_miles >= next_maintenance_miles` |
-| *"Which loads have been reassigned today?"* | `Load → LoadStatusEvent` where notes contain "reassignment" |
 | *"What is the count of trucks by make and model?"* | `Truck` applying a SUM and Group by to the query" |
 | *"Give me a list of drivers."* | `Drivers` return a simple list from a single Entity" |
+| *"Which loads have been reassigned today?"* | `Load → LoadStatusEvent` where notes contain "reassignment" |
 
 
 ### 9.3 Graph Traversal Example
@@ -521,16 +521,6 @@ Ask a multi-hop question that requires traversing several relationships:
 > 1. *"For the driver closest to their HOS limit, what load are they carrying and which customer does it belong to?"*
 
 This requires traversing: `Driver → HOSStatusChangeEvent` (to find the at-risk driver) → `Trip` (via `Driver operates Truck → Trip`) → `Load` → `Customer` — four hops in a single graph query that would require four SQL joins without the ontology.
-
-
-> 2. *"List the driver, customer, load description and load value for trips currently in progress.* 
-
-This requires two traversals within a single query: 
-`Trip → Load [Value] → Customer [Name]` - from Trip to Load to Customer to obtain the Load.value and Customer.Name
-`Trip → Driver [Name]`  - to obtain the Driver.first_name and Driver.last_name
-
-The overal query is limited by the current trip status:
-where `Trip.status = "in_progress"`
 
 ---
 
