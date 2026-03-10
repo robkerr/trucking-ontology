@@ -70,3 +70,13 @@ Configure your Event Hub connection string in the `02_generate_events` notebook 
 - **Maintenance**: Industry-standard intervals (oil 25K mi, tires 50K mi, brakes 30K mi, DOT annual)
 - **Geography**: Real US city coordinates for geospatial analysis
 - **CDL Endorsements**: Hazmat (H), Tanker (N), Doubles/Triples (T), Combo (X)
+
+Appendix:
+> 2. *"List the driver, customer, load description and load value for trips currently in progress.* 
+
+This requires two traversals within a single query: 
+`Trip → Load [Value] → Customer [Name]` - from Trip to Load to Customer to obtain the Load.value and Customer.Name
+`Trip → Driver [Name]`  - to obtain the Driver.first_name and Driver.last_name
+
+The overal query is limited by the current trip status:
+where `Trip.status = "in_progress"`

@@ -13,7 +13,7 @@
 4. [Prerequisites & Environment Setup](#4-prerequisites--environment-setup)
 5. [Create the Ontology](#5-create-the-ontology)
 6. [Explore What Was Created](#6-explore-what-was-created)
-7. [Add Event Data and Extra Relationships](#7-add-event-data-and-extra-relationships)
+7. [Add Timeseries Event Data to Entities](#7-add-timeseries-event-data-to-entities)
 8. [Create a Data Agent](#8-create-a-data-agent)
 9. [See the Data Agent Work with the Ontology](#9-see-the-data-agent-work-with-the-ontology)
 10. [Next Steps](#10-next-steps)
@@ -287,7 +287,7 @@ Click on **Truck**. In the properties panel you'll see:
 
 ### 6.3 Try a Graph Query
 
-In the Relationship graph, click on **Expand**. On **Query builder**, you can try connecting the nodes or you can open **Code editor** and paste the code below to try a GQL query to traverse the graph:
+In the "View entity type overview", click on **Expand** in the relationship graph. On **Query builder**, you can try connecting the nodes or you can open **Code editor** and paste the code below to try a GQL query to traverse the graph:
 
 ```gql
 MATCH (node_Truck:`Truck`)-[edge1_TruckMakesTrip:`TruckMakesTrip`]->(node_Trip:`Trip`),
@@ -301,71 +301,140 @@ This retrieves all available trucks, the trips they're currently performing, and
 
 ---
 
-## 7. Add Event Data and Extra Relationships
+## 7. Add Timeseries Event Data to Entities
 
-The static reference data gives you the *structure* of your domain. The Eventhouse event tables give it *life* — real-time operational data flowing in continuously.
+Rather than creating separate event entity types, you can enrich existing reference entities with **Timeseries** bindings — attaching live Eventhouse data directly to the entities that own it. This section adds four bindings: GPS/telemetry to `Trip`, engine faults to `Truck`, load status to `Load`, and HOS events to `Driver`.
 
-### 7.1 Add the Eventhouse as a Data Source
+### 7.1 Bind TelemetryEvent to Trip
 
-1. In the Ontology editor, click **Data sources**
-2. Click **+ Add data source** → **Eventhouse**
-3. Select `eh_trucking` / `trucking_db`
+1. In the ontology editor, click on the **`Trip`** entity type to open the **Entity type configuration** pane
+2. Go to the **Bindings** tab → click **Add data to entity type**
+3. Select your workspace → **`eh_trucking`** Eventhouse → **`trucking_db`** database → **`TelemetryEvent`** table → click **Next**
+4. For **Binding type**, select **Timeseries**
+5. For **Source data timestamp column**, select `timestamp`
+6. Under **Bind your properties**, map the columns:
 
-### 7.2 Create Event Entity Types
+   | Column | Property Type |
+   |--------|---------------|
+   | `trip_id` | Static |
+   | `timestamp` | *(timestamp column — already set above)* |
+   | `truck_id` | Timeseries |
+   | `latitude` | Timeseries |
+   | `longitude` | Timeseries |
+   | `speed_mph` | Timeseries |
+   | `heading_degrees` | Timeseries |
+   | `fuel_pct` | Timeseries |
+   | `engine_temp_f` | Timeseries |
+   | `oil_pressure_psi` | Timeseries |
+   | `odometer_miles` | Timeseries |
+   | `engine_rpm` | Timeseries |
+   | `ambient_temp_f` | Timeseries |
+   | `def_level_pct` | Timeseries |
 
-Create a new entity type for each event table:
+7. Click **Save**
 
-#### TelemetryEvent
-- **Data source:** `trucking_db.TelemetryEvent`
-- **Key property:** `event_id`
-- **Key properties to expose:** `timestamp`, `truck_id`, `latitude`, `longitude`, `speed_mph`, `fuel_pct`, `odometer_miles`
+The `Trip` entity now has two data bindings: the original static binding from `lh_trucking.trips` and the new timeseries binding from `trucking_db.TelemetryEvent`.
 
-#### EngineFaultEvent
-- **Data source:** `trucking_db.EngineFaultEvent`
-- **Key property:** `event_id`
-- **Key properties to expose:** `timestamp`, `truck_id`, `spn`, `fmi`, `fault_description`, `severity`
+> **Note:** The `trip_id` column in `TelemetryEvent` is the link between the timeseries data and the Trip entity instances. Make sure it matches the key property on `Trip`.
 
-#### HOSStatusChangeEvent
-- **Data source:** `trucking_db.HOSStatusChangeEvent`
-- **Key property:** `event_id`
-- **Key properties to expose:** `timestamp`, `driver_id`, `new_status`, `driving_hours_remaining`, `duty_hours_remaining`
+### 7.2 Bind EngineFaultEvent to Truck
 
-#### LoadStatusEvent
-- **Data source:** `trucking_db.LoadStatusEvent`
-- **Key property:** `event_id`
-- **Key properties to expose:** `timestamp`, `load_id`, `new_status`, `notes`
+The `EngineFaultEvent` table records J1939 diagnostic trouble codes keyed by `truck_id`. Bind it to the existing `Truck` entity type to surface fault history directly on each truck.
 
-### 7.3 Add Relationships Between Events and Entities
+1. In the ontology editor, click on the **`Truck`** entity type to open the **Entity type configuration** pane
+2. Go to the **Bindings** tab → click **Add data to entity type**
+3. Select your workspace → **`eh_trucking`** Eventhouse → **`trucking_db`** database → **`EngineFaultEvent`** table → click **Next**
+4. For **Binding type**, select **Timeseries**
+5. For **Source data timestamp column**, select `timestamp`
+6. Under **Bind your properties**, map the columns:
 
-These relationships connect the real-time event stream back to your reference entities:
+   | Column | Property Type |
+   |--------|---------------|
+   | `truck_id` | Static |
+   | `timestamp` | *(timestamp column — already set above)* |
+   | `trip_id` | Timeseries |
+   | `driver_id` | Timeseries |
+   | `spn` | Timeseries |
+   | `fmi` | Timeseries |
+   | `fault_description` | Timeseries |
+   | `severity` | Timeseries |
+   | `occurrence_count` | Timeseries |
+   | `latitude` | Timeseries |
+   | `longitude` | Timeseries |
+   | `action` | Timeseries |
 
-| Relationship | Verb | Connects |
-|--------------|------|---------|
-| `Truck` → `TelemetryEvent` | `Truck emits TelemetryEvent` | Truck to its telemetry pings |
-| `Truck` → `EngineFaultEvent` | `Truck raises EngineFaultEvent` | Truck to its fault codes |
-| `Driver` → `HOSStatusChangeEvent` | `Driver logs HOSStatusChangeEvent` | Driver to their HOS transitions |
-| `Load` → `LoadStatusEvent` | `Load records LoadStatusEvent` | Load to its status history |
+7. Click **Save**
 
-To create a relationship:
-1. Click **+ Add relationship** in the canvas
-2. Select the source entity type
-3. Enter the relationship verb (active voice)
-4. Select the target entity type
-5. Map the join key (e.g., `Truck.truck_id = TelemetryEvent.truck_id`)
+The `Truck` entity now has two data bindings: the original static binding from `lh_trucking.trucks` and the new timeseries binding from `trucking_db.EngineFaultEvent`.
 
-### 7.4 Query Across Static + Real-Time Data
+> **Note:** The `truck_id` column in `EngineFaultEvent` links to Truck entity instances and must match the key property on `Truck`.
 
-Now you can ask questions that span both layers:
+### 7.3 Bind LoadStatusEvent to Load
 
-```gql
-MATCH (d:Driver)-[:logs]->(h:HOSStatusChangeEvent)
-WHERE h.driving_hours_remaining < 1.0
-RETURN d.first_name, d.last_name, h.driving_hours_remaining, h.timestamp
-ORDER BY h.driving_hours_remaining ASC
-```
+The `LoadStatusEvent` table records load lifecycle status changes keyed by `load_id`. Bind it to the existing `Load` entity type.
 
-This finds every driver currently at risk of an HOS violation — combining static driver data with live ELD events.
+1. In the ontology editor, click on the **`Load`** entity type to open the **Entity type configuration** pane
+2. Go to the **Bindings** tab → click **Add data to entity type**
+3. Select your workspace → **`eh_trucking`** Eventhouse → **`trucking_db`** database → **`LoadStatusEvent`** table → click **Next**
+4. For **Binding type**, select **Timeseries**
+5. For **Source data timestamp column**, select `timestamp`
+6. Under **Bind your properties**, map the columns:
 
+   | Column | Property Type |
+   |--------|---------------|
+   | `load_id` | Static |
+   | `timestamp` | *(timestamp column — already set above)* |
+   | `trip_id` | Timeseries |
+   | `customer_id` | Timeseries |
+   | `load_number` | Timeseries |
+   | `previous_status` | Timeseries |
+   | `new_status` | Timeseries |
+   | `terminal_id` | Timeseries |
+   | `latitude` | Timeseries |
+   | `longitude` | Timeseries |
+   | `estimated_arrival` | Timeseries |
+   | `notes` | Timeseries |
+
+7. Click **Save**
+
+The `Load` entity now has two data bindings: the original static binding from `lh_trucking.loads` and the new timeseries binding from `trucking_db.LoadStatusEvent`.
+
+> **Note:** The `load_id` column in `LoadStatusEvent` links to Load entity instances and must match the key property on `Load`.
+
+### 7.4 Bind HOSStatusChangeEvent to Driver
+
+The `HOSStatusChangeEvent` table records driver duty status transitions keyed by `driver_id`. Bind it to the existing `Driver` entity type.
+
+1. In the ontology editor, click on the **`Driver`** entity type to open the **Entity type configuration** pane
+2. Go to the **Bindings** tab → click **Add data to entity type**
+3. Select your workspace → **`eh_trucking`** Eventhouse → **`trucking_db`** database → **`HOSStatusChangeEvent`** table → click **Next**
+4. For **Binding type**, select **Timeseries**
+5. For **Source data timestamp column**, select `timestamp`
+6. Under **Bind your properties**, map the columns:
+
+   | Column | Property Type |
+   |--------|---------------|
+   | `driver_id` | Static |
+   | `timestamp` | *(timestamp column — already set above)* |
+   | `trip_id` | Timeseries |
+   | `truck_id` | Timeseries |
+   | `previous_status` | Timeseries |
+   | `new_status` | Timeseries |
+   | `driving_hours_used` | Timeseries |
+   | `driving_hours_remaining` | Timeseries |
+   | `duty_hours_used` | Timeseries |
+   | `duty_hours_remaining` | Timeseries |
+   | `cycle_hours_used` | Timeseries |
+   | `cycle_hours_remaining` | Timeseries |
+   | `break_time_remaining_minutes` | Timeseries |
+   | `latitude` | Timeseries |
+   | `longitude` | Timeseries |
+
+7. Click **Save**
+
+The `Driver` entity now has two data bindings: the original static binding from `lh_trucking.drivers` and the new timeseries binding from `trucking_db.HOSStatusChangeEvent`.
+
+> **Note:** The `driver_id` column in `HOSStatusChangeEvent` links to Driver entity instances and must match the key property on `Driver`.
 ---
 
 ## 8. Create a Data Agent
@@ -400,17 +469,16 @@ When answering questions:
 - For real-time questions (location, speed, HOS hours), use the event entity types
 - For operational questions (which truck, which driver, which load), use the reference entities
 - Always cite the data behind your answer
+- Do not return ids unless user ask for it
 ```
 
-### 8.4 Configure the Starting Questions
+### 8.4 Try out some starting questions
 
-Add a few suggested questions to help users get started:
+Some questions to help you validate the agent:
 
-- *Which trucks are currently running low on fuel?*
 - *Are any drivers close to their HOS limit right now?*
-- *What is the current status of load LN-0001?*
 - *Which trips are at risk of late arrival?*
-- *Show me all engine fault events for trucks on active trips*
+- *What have been the average RPM for trips originating from Atlanta?*
 
 ---
 
@@ -441,9 +509,9 @@ Use the agent to investigate the injected scenarios:
 | *"Is any truck broken down right now?"* | `Truck → EngineFaultEvent` with `severity = 'critical'` + `Truck` speed = 0 |
 | *"Which drivers need a break soon?"* | `Driver → HOSStatusChangeEvent` where `driving_hours_remaining < 1.0` |
 | *"What truck needs maintenance most urgently?"* | `Truck` where `odometer_miles >= next_maintenance_miles` |
-| *"Which loads have been reassigned today?"* | `Load → LoadStatusEvent` where notes contain "reassignment" |
 | *"What is the count of trucks by make and model?"* | `Truck` applying a SUM and Group by to the query" |
 | *"Give me a list of drivers."* | `Drivers` return a simple list from a single Entity" |
+| *"Which loads have been reassigned today?"* | `Load → LoadStatusEvent` where notes contain "reassignment" |
 
 
 ### 9.3 Graph Traversal Example
@@ -453,16 +521,6 @@ Ask a multi-hop question that requires traversing several relationships:
 > 1. *"For the driver closest to their HOS limit, what load are they carrying and which customer does it belong to?"*
 
 This requires traversing: `Driver → HOSStatusChangeEvent` (to find the at-risk driver) → `Trip` (via `Driver operates Truck → Trip`) → `Load` → `Customer` — four hops in a single graph query that would require four SQL joins without the ontology.
-
-
-> 2. *"List the driver, customer, load description and load value for trips currently in progress.* 
-
-This requires two traversals within a single query: 
-`Trip → Load [Value] → Customer [Name]` - from Trip to Load to Customer to obtain the Load.value and Customer.Name
-`Trip → Driver [Name]`  - to obtain the Driver.first_name and Driver.last_name
-
-The overal query is limited by the current trip status:
-where `Trip.status = "in_progress"`
 
 ---
 
@@ -499,16 +557,15 @@ Use Power BI connected to the semantic model + KQL querysets to build operationa
 
 ## Reference
 
-| Resource | Location |
-|----------|----------|
-| Setup notebook | `notebooks/00_demo_setup.ipynb` |
-| Event generation notebook | `notebooks/02_generate_events.ipynb` |
-| Eventhouse DDL | `scripts/eventhouse_setup.kql` |
-| Sample KQL queries | `sample_queries.kql` |
-| Semantic model project | `semantic_model_project/TruckingSM.SemanticModel/` |
-| Reference data scripts | `scripts/generate_reference_data.py` |
-| [YouTube: Extending the Ontology with Realtime Telematics](https://youtu.be/6V9mDSNoXz4) |
-| [YouTube: Integrating the Data Agent with a Multi-source Foundry Agent](https://youtu.be/ognvJ6oKW-M) |
+### 📺 Video Walkthroughs
+
+These companion videos extend the demo with additional scenarios:
+
+| Video | Description |
+|-------|-------------|
+| [Designing and Building an Ontology in Microsoft Fabric (uncut)](https://www.youtube.com/watch?v=HrWErMwKjbI) | Full uncut walkthrough of designing and building the trucking ontology end-to-end in Microsoft Fabric |
+| [Extending the Ontology with Realtime Telematics](https://youtu.be/6V9mDSNoXz4) | Walks through binding live Eventhouse telemetry to the trucking ontology and querying it in real time |
+| [Integrating the Data Agent with a Multi-source Foundry Agent](https://youtu.be/ognvJ6oKW-M) | Shows how to connect the TruckingAgent to a Foundry-based multi-agent orchestration pipeline |
 
 ---
 
