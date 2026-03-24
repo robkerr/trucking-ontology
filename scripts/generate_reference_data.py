@@ -413,7 +413,7 @@ CARGO_DESCRIPTIONS = {
 
 def generate_loads(customers, terminals, routes):
     loads = []
-    now = datetime(2026, 3, 17, 12, 0, 0)
+    now = datetime(2026, 3, 24, 12, 0, 0)
 
     for i in range(30):
         load_type, trailer_type, endorsements = random.choice(LOAD_TYPES)
@@ -461,7 +461,7 @@ def generate_loads(customers, terminals, routes):
 
 def generate_trips(drivers, trucks, trailers, loads, routes, terminals):
     trips = []
-    now = datetime(2026, 3, 17, 12, 0, 0)
+    now = datetime(2026, 3, 24, 12, 0, 0)
 
     available_drivers = [d for d in drivers]
     available_trucks = [t for t in trucks]
@@ -640,7 +640,7 @@ FAULT_CODES = [
 
 def generate_service_tickets(trucks, trips, terminals):
     tickets = []
-    now = datetime(2026, 3, 17, 12, 0, 0)
+    now = datetime(2026, 3, 24, 12, 0, 0)
 
     for i in range(25):
         truck = random.choice(trucks)
@@ -698,7 +698,7 @@ DUTY_STATUSES = ["driving", "on_duty_not_driving", "sleeper_berth", "off_duty"]
 
 def generate_hos_logs(drivers, trips):
     logs = []
-    now = datetime(2026, 3, 17, 12, 0, 0)
+    now = datetime(2026, 3, 24, 12, 0, 0)
     seven_days_ago = now - timedelta(days=7)
 
     active_drivers = [d for d in drivers if d["status"] in ("driving", "available")]
