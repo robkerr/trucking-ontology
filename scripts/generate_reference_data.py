@@ -14,6 +14,10 @@ import os
 from datetime import datetime, timedelta, date
 from math import radians, sin, cos, sqrt, atan2
 
+# Use current date/time for data generation
+TODAY = date.today()
+NOW = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0)
+
 random.seed(42)
 
 OUTPUT_DIR = os.environ.get(
@@ -183,7 +187,7 @@ def generate_trailers(terminals):
             "status": "available",
             "home_terminal_id": random.choice(terminals)["terminal_id"],
             "year": random.randint(2017, 2025),
-            "last_inspection_date": str(random_date(date(2025, 6, 1), date(2026, 3, 24))),
+            "last_inspection_date": str(random_date(date(2025, 6, 1), TODAY)),
         })
     return trailers
 
@@ -413,7 +417,7 @@ CARGO_DESCRIPTIONS = {
 
 def generate_loads(customers, terminals, routes):
     loads = []
-    now = datetime(2026, 3, 24, 12, 0, 0)
+    now = NOW
 
     for i in range(30):
         load_type, trailer_type, endorsements = random.choice(LOAD_TYPES)
@@ -461,7 +465,7 @@ def generate_loads(customers, terminals, routes):
 
 def generate_trips(drivers, trucks, trailers, loads, routes, terminals):
     trips = []
-    now = datetime(2026, 3, 24, 12, 0, 0)
+    now = NOW
 
     available_drivers = [d for d in drivers]
     available_trucks = [t for t in trucks]
@@ -594,7 +598,7 @@ def generate_maintenance_events(trucks, terminals):
         mtype = random.choice(list(maint_types_costs.keys()))
         cost_lo, cost_hi = maint_types_costs[mtype]
 
-        sched_date = random_date(date(2025, 1, 1), date(2026, 3, 24))
+        sched_date = random_date(date(2025, 1, 1), TODAY)
         completed = random.random() < 0.85
         comp_date = sched_date + timedelta(days=random.randint(0, 3)) if completed else None
 
@@ -640,7 +644,7 @@ FAULT_CODES = [
 
 def generate_service_tickets(trucks, trips, terminals):
     tickets = []
-    now = datetime(2026, 3, 24, 12, 0, 0)
+    now = NOW
 
     for i in range(25):
         truck = random.choice(trucks)
@@ -698,7 +702,7 @@ DUTY_STATUSES = ["driving", "on_duty_not_driving", "sleeper_berth", "off_duty"]
 
 def generate_hos_logs(drivers, trips):
     logs = []
-    now = datetime(2026, 3, 24, 12, 0, 0)
+    now = NOW
     seven_days_ago = now - timedelta(days=7)
 
     active_drivers = [d for d in drivers if d["status"] in ("driving", "available")]
