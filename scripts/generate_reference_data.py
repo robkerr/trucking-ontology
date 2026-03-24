@@ -183,7 +183,7 @@ def generate_trailers(terminals):
             "status": "available",
             "home_terminal_id": random.choice(terminals)["terminal_id"],
             "year": random.randint(2017, 2025),
-            "last_inspection_date": str(random_date(date(2025, 6, 1), date(2026, 1, 31))),
+            "last_inspection_date": str(random_date(date(2025, 6, 1), date(2026, 3, 24))),
         })
     return trailers
 
@@ -594,7 +594,7 @@ def generate_maintenance_events(trucks, terminals):
         mtype = random.choice(list(maint_types_costs.keys()))
         cost_lo, cost_hi = maint_types_costs[mtype]
 
-        sched_date = random_date(date(2025, 1, 1), date(2026, 2, 14))
+        sched_date = random_date(date(2025, 1, 1), date(2026, 3, 24))
         completed = random.random() < 0.85
         comp_date = sched_date + timedelta(days=random.randint(0, 3)) if completed else None
 
