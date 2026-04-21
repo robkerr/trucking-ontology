@@ -312,13 +312,11 @@ Rather than creating separate event entity types, you can enrich existing refere
 3. Select your workspace → **`eh_trucking`** Eventhouse → **`trucking_db`** database → **`TelemetryEvent`** table → click **Next**
 4. For **Binding type**, select **Timeseries**
 5. For **Source data timestamp column**, select `timestamp`
-6. Under **Bind your properties**, map the columns:
+6. Under **Bind your properties**, map the the following colmns. For any column not listed, delete it from the binding list:
 
    | Column | Property Type |
    |--------|---------------|
    | `trip_id` | Static |
-   | `timestamp` | *(timestamp column — already set above)* |
-   | `truck_id` | Timeseries |
    | `latitude` | Timeseries |
    | `longitude` | Timeseries |
    | `speed_mph` | Timeseries |
@@ -329,13 +327,34 @@ Rather than creating separate event entity types, you can enrich existing refere
    | `odometer_miles` | Timeseries |
    | `engine_rpm` | Timeseries |
    | `ambient_temp_f` | Timeseries |
-   | `def_level_pct` | Timeseries |
 
 7. Click **Save**
 
 The `Trip` entity now has two data bindings: the original static binding from `lh_trucking.trips` and the new timeseries binding from `trucking_db.TelemetryEvent`.
 
 > **Note:** The `trip_id` column in `TelemetryEvent` is the link between the timeseries data and the Trip entity instances. Make sure it matches the key property on `Trip`.
+
+### 7.1.1 Examine the data that has been bound
+
+Since you changed the Ontology design, the ontology will be processing (you can monitor it in the 'Monitor' tab). While we wait, let's look at what the data is that we just bound to the Ontology.
+
+1. From the workspae, open the KQL database 'eh_trucking'
+2. Find the TelemetryEvent table.
+3. Can you see how it would be helpful to be able to ask questions, such as which trips had anomolies?
+
+### 7.1.2. Create a data agent to ask about the Telemetry
+
+Once the Ontology has finished proessing, let's use the KQL Data in a Data Agent.
+
+1. Create a new data agent in the workspace. 
+2. Select the Ontology as the only data source for the new data agent
+3. Ask this question:
+
+*"Which trips have had engine temperature exceeding 200? Include the source and destination terminal city names, and the truck_number for each trip in the list. Output the result as a table."*
+
+The output should show you a lsit of trucks and trips that have had high engine temperatures.
+
+To answer this question, the Ontology had to first query the KQL data for realtime answers, then follow the Ontology graph to fetch the information about the truck name and terminal names associated with the trip!
 
 ### 7.2 Bind EngineFaultEvent to Truck
 
