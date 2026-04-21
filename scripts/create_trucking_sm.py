@@ -17,7 +17,7 @@ Usage:
     python scripts/create_trucking_sm.py
 
 Requirements:
-    pip install fabric-cicd sempy-labs
+    pip install "fabric-cicd<1.0.0" sempy-labs
 """
 
 import argparse
@@ -34,6 +34,12 @@ from pathlib import Path
 
 SM_MODEL_NAME = "TruckingSM"
 
+# fabric-cicd v1.0.0 (released 2026-04-20) introduced a breaking change that
+# requires an explicit `token_credential` keyword arg on FabricWorkspace and
+# removed implicit auth inside Fabric notebooks. Pin to the last compatible
+# release until publish_model is updated to pass a credential explicitly.
+FABRIC_CICD_SPEC = "fabric-cicd<1.0.0"
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -43,16 +49,25 @@ def ensure_fabric_cicd():
 
     # pip install in a subprocess doesn't make the module available in-process
     # until caches are cleared and the module is explicitly (re)imported.
+    needs_install = False
     try:
         import fabric_cicd  # noqa: F401
         version = importlib.metadata.version("fabric-cicd")
-        print(f"  fabric-cicd {version} already installed.")
-        return
+        major = int(version.split(".")[0])
+        if major >= 1:
+            print(f"  fabric-cicd {version} found, but requires <1.0.0. Reinstalling...")
+            needs_install = True
+        else:
+            print(f"  fabric-cicd {version} already installed.")
+            return
     except (ImportError, importlib.metadata.PackageNotFoundError):
-        pass
+        needs_install = True
 
-    print("  Installing fabric-cicd...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "fabric-cicd", "-q"])
+    if needs_install:
+        print(f"  Installing {FABRIC_CICD_SPEC}...")
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", FABRIC_CICD_SPEC, "-q"]
+        )
 
     # Flush the import system so the newly installed package is found
     import importlib
