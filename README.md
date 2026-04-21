@@ -385,8 +385,8 @@ The `LoadStatusEvent` table records load lifecycle status changes keyed by `load
    | `load_id` | Static |
    | `timestamp` | *(timestamp column — already set above)* |
    | `trip_id` | Timeseries |
-   | `customer_id` | Timeseries |
-   | `load_number` | Timeseries |
+   | `customer_id` | Static |
+   | `load_number` | Static |
    | `previous_status` | Timeseries |
    | `new_status` | Timeseries |
    | `terminal_id` | Timeseries |
